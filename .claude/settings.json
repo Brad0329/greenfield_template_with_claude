@@ -22,7 +22,9 @@
       "PowerShell(git diff *)",
       "PowerShell(git log)",
       "PowerShell(git log *)",
-      "PowerShell(git commit -F .git/COMMIT_MSG_CLAUDE.txt)"
+      "PowerShell(git commit -F .git/COMMIT_MSG_CLAUDE.txt)",
+      "Write(.git/COMMIT_MSG_CLAUDE.txt)",
+      "Edit(.git/COMMIT_MSG_CLAUDE.txt)"
     ],
     "deny": [
       "Bash(rm -rf *)",
