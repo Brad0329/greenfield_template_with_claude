@@ -33,7 +33,7 @@ docs/playbooks/노하우_*.md       ← 스택 중립 노하우 5종 — 항상 
 docs/playbooks/팩_*.md           ← 선택형 스택 팩 5종 — 해당 없으면 초기화 때 삭제
 work_log/plan.md                 ← 전체 계획 단일 원본
 work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
-.claude/agents/*.md              ← 선택적 검증 에이전트 3종
+.claude/agents/*.md              ← 선택적 에이전트 4종 (검증 3 + 조사 1)
 .claude/settings.json            ← deny(안전장치) + allow 리서치·공용 스타터 셋. 초기화 때 스택에 맞게 다듬는다
 ```
 
@@ -93,10 +93,11 @@ flutter 테스트, git 기본)이 미리 들어 있다 — **이 스택에 없�
 - **요구사항이 바뀌면 그 자리에서 REQUIREMENTS.md를 고친다** — 대화 속 합의로만 남기면
   다음 세션이 구버전으로 구현한다.
 
-## 검증 에이전트 3종 — 있으면 쓰고, 없으면 대체한다
+## 에이전트 4종 — 있으면 쓰고, 없으면 대체한다
 
 | 에이전트 | 시점 | 역할 |
 |---|---|---|
+| `researcher` | 조사 단계(Phase 001 등) | 데이터 소스·외부 API·라이선스를 **실측 근거와 함께** 조사 보고. 독립 조사는 병렬 인스턴스로 — 메인은 결론만 받는다 |
 | `requirements-analyst` | 구현 **전** | 요구사항을 구현 가능한 스펙으로 + **모호점을 질문 목록으로** |
 | `spec-checker` | 완료 **후** | 구현 vs 수용 기준 대조, 누락·조용한 축소·임의 추가 검출 |
 | `qa-tester` | Phase 완료 | 통합 테스트 게이트(foreground). 코드를 고치지 않고 판정만 |
