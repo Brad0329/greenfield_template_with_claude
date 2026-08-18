@@ -1,7 +1,29 @@
 {
   "permissions": {
     "defaultMode": "acceptEdits",
-    "allow": [],
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "PowerShell(Invoke-WebRequest *)",
+      "PowerShell(curl.exe *)",
+      "PowerShell(Expand-Archive *)",
+      "PowerShell(tar *)",
+      "PowerShell(py *)",
+      "PowerShell(.venv\\Scripts\\python.exe *)",
+      "PowerShell(flutter analyze)",
+      "PowerShell(flutter analyze *)",
+      "PowerShell(flutter test)",
+      "PowerShell(flutter test *)",
+      "PowerShell(dart format *)",
+      "PowerShell(git status)",
+      "PowerShell(git status *)",
+      "PowerShell(git add *)",
+      "PowerShell(git diff)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log)",
+      "PowerShell(git log *)",
+      "PowerShell(git commit -F .git/COMMIT_MSG_CLAUDE.txt)"
+    ],
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push --force*)",

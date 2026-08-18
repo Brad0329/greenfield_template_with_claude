@@ -34,7 +34,7 @@ docs/playbooks/팩_*.md           ← 선택형 스택 팩 5종 — 해당 없�
 work_log/plan.md                 ← 전체 계획 단일 원본
 work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
 .claude/agents/*.md              ← 선택적 검증 에이전트 3종
-.claude/settings.json            ← deny(안전장치)만 채워져 있다. allow는 비어 있다
+.claude/settings.json            ← deny(안전장치) + allow 리서치·공용 스타터 셋. 초기화 때 스택에 맞게 다듬는다
 ```
 
 ## 동봉된 노하우·팩 (실전 프로젝트 1회분의 교훈 환류)
@@ -57,9 +57,11 @@ work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
 
 ## ★ 초기화 때 반드시 하는 것
 
-**`.claude/settings.json`의 `allow`를 이 프로젝트의 실제 명령으로 채운다.**
-일부러 비워뒀다 — **틀린 기본값은 빈 칸보다 나쁘다.** 안 맞는 허용 목록은 매 명령마다
-사용자에게 확인을 묻게 만들고, 그게 며칠간 이어진다.
+**`.claude/settings.json`의 `allow`를 이 프로젝트에 맞게 다듬는다.**
+리서치·공용 스타터 셋(웹 조사 `WebSearch`/`WebFetch`, 다운로드·압축 해제, py/.venv 파이썬,
+flutter 테스트, git 기본)이 미리 들어 있다 — **이 스택에 없는 항목은 지우고, 실제로 쓸
+명령(테스트·빌드·실행)을 더한다.** **틀린 기본값은 빈 칸보다 나쁘다.** 안 맞는 허용 목록은
+매 명령마다 사용자에게 확인을 묻게 만들고, 그게 며칠간 이어진다.
 
 - 규칙 문법: `"Bash(git log *)"` = 프리픽스 매칭, `"Bash(npm test)"` = 정확 일치. `deny`가 우선.
   **패턴은 `명령`과 `명령 *`(공백+별표) 두 형태를 함께** 넣는다 — `명령*`(공백 없음)은 인자
