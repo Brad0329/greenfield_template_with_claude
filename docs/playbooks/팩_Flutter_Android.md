@@ -18,6 +18,10 @@
 - **`adb devices`가 비면 OS가 기기를 보는지부터 확인한다**(`Get-PnpDevice` 등).
   USB 테더링이 켜져 있으면 ADB 인터페이스가 안 열리고, 제조사 보안 기능(삼성 Auto Blocker)이
   USB 명령을 막기도 한다.
+- **adb는 PATH에 없다 — 전체 경로를 글자 그대로(리터럴) 쓴다.** `& (Join-Path …)` 같은
+  변수 시작 형태는 허용 규칙에 안 걸려 매번 확인을 묻는다(실측 대기 77.8초, adb 실행은 2~5초).
+  허용 규칙도 그 리터럴 경로로 등록한다 — 템플릿 settings.json에 4종(devices/install/logcat/shell)이
+  들어 있다.
 
 ## 테스트
 
