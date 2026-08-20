@@ -34,7 +34,10 @@ docs/playbooks/팩_*.md           ← 선택형 스택 팩 5종 — 해당 없�
 work_log/plan.md                 ← 전체 계획 단일 원본
 work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
 .claude/agents/*.md              ← 선택적 에이전트 4종 (검증 3 + 조사 1)
-.claude/settings.json            ← deny(안전장치) + allow 리서치·공용 스타터 셋. 초기화 때 스택에 맞게 다듬는다
+.claude/skills/approval-audit/   ← /approval-audit — Phase 종료 시 승인 대기 원인 점검 (파이썬 3.10+)
+.claude/hooks/no_redundant_cd.py ← `cd <루트> && …` 호출 차단 훅 (settings.json에 등록돼 있다)
+scripts/measure_approvals.py     ← 승인 대기 측정기 (스킬이 사용. 테스트: tests/test_measure_approvals.py)
+.claude/settings.json            ← deny(안전장치) + allow 리서치·공용 스타터 셋 + 훅 등록. 초기화 때 스택에 맞게 다듬는다
 ```
 
 ## 동봉된 노하우·팩 (실전 프로젝트 1회분의 교훈 환류)
