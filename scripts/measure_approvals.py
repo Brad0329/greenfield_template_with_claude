@@ -25,6 +25,13 @@
 **세션을 재시작하고 다시 돌려** 예측이 맞았는지 확인해야 한다
 (`settings.json`은 세션 시작 시점에 읽힌다).
 
+**★★ 파이프라인의 꼬리를 원인으로 지목하면 그것은 오진이다** (hanjadic 2026-08-20 실측).
+이 스크립트는 `|`·`;`로 조각내 조각마다 head를 세는데, **PowerShell 도구는 앞머리 하나로
+줄 전체를 판정한다** — `git log | Out-File <경로>`가 안 물었다(파일을 쓰는 cmdlet인데도).
+그래서 `Select-Object`·`Select-String`이 "남은 최대 원인"으로 두 번 보고됐지만 **둘 다
+가짜였고**, 규칙을 넣었다면 한 건도 안 줄었다. **꼬리가 상위에 뜨면 그 줄의 앞머리를 봐라.**
+(Bash 도구도 같은지는 재보지 않았다.)
+
 사용법:
   python scripts/measure_approvals.py                 # 가장 최근 세션
   python scripts/measure_approvals.py --sessions 3    # 최근 3개 세션 합산
