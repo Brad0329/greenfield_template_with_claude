@@ -394,16 +394,19 @@ def main() -> int:
     print(f"  A. 지금 그대로                     {simulate(calls, rules, False, []):>4}건")
     print(f"  B. cd 접두사만 없앴을 때           {simulate(calls, rules, True, []):>4}건")
     if candidates:
-        print(f"  C. B + 아래 읽기 전용 규칙 추가    {simulate(calls, rules, True, candidates):>4}건")
+        print(f"  C. B + 읽기 전용 전부 허용 가정    {simulate(calls, rules, True, candidates):>4}건"
+              "   (상한 추정용 — 아래 참조)")
 
     if candidates:
-        print("\n[제안 — 읽기 전용만] settings.json의 permissions.allow에 넣을 것")
+        print("\n[읽기 전용 후보] ★ `명령 *` 와일드카드 규칙은 무효다(Bash·PowerShell 모두 실측).")
+        print("  규칙을 늘리지 말고 ① 반복되는 호출 문자열을 고정하고 ② '다시 묻지 않기'로")
+        print("  정확 일치를 쌓아라. PowerShell 파이프 꼬리로만 쓰인 것은 애초에 검사되지 않는다.")
         for name, n in st["readonly_missing"].most_common():
             hint = ""
             first = st["readonly_as_first"][name]
             if first:
                 hint = f"   ← {first}건은 파일 조회다. Read/Grep/Glob 도구로 바꿀 자리"
-            print(f'  "Bash({name} *)",   # {n}회{hint}')
+            print(f"  {name:<12} # {n}회{hint}")
 
     if st["needs_judgment"]:
         print("\n[자동 제안하지 않음] 사람이 판단할 것 — 대개는 '묻는 게 맞다'가 정답이다")

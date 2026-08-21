@@ -35,9 +35,9 @@ work_log/plan.md                 ← 전체 계획 단일 원본
 work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
 .claude/agents/*.md              ← 선택적 에이전트 4종 (검증 3 + 조사 1)
 .claude/skills/approval-audit/   ← /approval-audit — Phase 종료 시 승인 대기 원인 점검 (파이썬 3.10+)
-.claude/hooks/no_redundant_cd.py ← `cd <루트> && …` 호출 차단 훅 (settings.json에 등록돼 있다)
-scripts/measure_approvals.py     ← 승인 대기 측정기 (스킬이 사용. 테스트: tests/test_measure_approvals.py)
-.claude/settings.json            ← deny(안전장치) + allow 리서치·공용 스타터 셋 + 훅 등록. 초기화 때 스택에 맞게 다듬는다
+.claude/hooks/*.py               ← 습관 차단 훅 3종: cd 접두사·출력 필터·flutter test 인자 (settings.json에 등록)
+scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · measure_wait.py ← 벽시계 실측 (테스트 동봉)
+.claude/settings.json            ← deny(안전장치) + allow 정확 일치 최소 셋 + 훅 등록. 초기화 때 스택에 맞게 다듬는다
 ```
 
 ## 동봉된 노하우·팩 (실전 프로젝트 1회분의 교훈 환류)
@@ -61,10 +61,11 @@ scripts/measure_approvals.py     ← 승인 대기 측정기 (스킬이 사용. 
 ## ★ 초기화 때 반드시 하는 것
 
 **`.claude/settings.json`의 `allow`를 이 프로젝트에 맞게 다듬는다.**
-리서치·공용 스타터 셋(웹 조사 `WebSearch`/`WebFetch`, 다운로드·압축 해제, py/.venv 파이썬,
-flutter 테스트, git 기본)이 미리 들어 있다 — **이 스택에 없는 항목은 지우고, 실제로 쓸
-명령(테스트·빌드·실행)을 더한다.** **틀린 기본값은 빈 칸보다 나쁘다.** 안 맞는 허용 목록은
-매 명령마다 사용자에게 확인을 묻게 만들고, 그게 며칠간 이어진다.
+**정확 일치 최소 셋**(웹 도구 · 커밋 메시지 파일 · git 기본 · flutter/pytest 맨몸 형태)이
+들어 있다 — 셸 규칙의 `명령 *` 와일드카드는 **두 도구 모두 무효**라는 실측(독립 5건) 때문에
+정확 일치만 담았다. **이 스택에 없는 항목은 지우고**, 자주 쓰는 호출은 "다시 묻지 않기"로
+정확 일치를 쌓아 간다. **틀린 기본값은 빈 칸보다 나쁘다** — 무효 규칙은 "규칙이 있는데 왜
+묻지"라는 오진을 만든다(실제로 그 오진 위에 규칙 수십 개가 쌓였었다).
 
 - 규칙 문법: `"Bash(git log *)"` = 프리픽스 매칭, `"Bash(npm test)"` = 정확 일치. `deny`가 우선.
   ⚠️ **PowerShell 규칙의 `명령 *` 와일드카드는 실측에서 안 걸렸다 — 정확 일치만 걸린다**
