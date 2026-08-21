@@ -40,18 +40,32 @@ import sys
 # `flutter test` 뒤에 **무언가 더 있는** 형태. 맨몸(뒤에 공백뿐)은 통과시킨다.
 TARGETED = re.compile(r"^\s*flutter\s+test\s+\S")
 
+# **딱 하나 판 예외** (2026-08-20 F-034 후속): 실패한 것만 출력하는 리포터.
+#
+# 전체 실행 출력이 68KB라 **어느 테스트가 실패했는지 읽기 어려웠다** — F-033·F-034의
+# 변이 확인을 exit 코드와 "직전에 green이었다"로 판정해야 했다.
+# 이 형태는 **문자열이 고정**이라 정확 일치 규칙으로 덮이고, 그래서 프롬프트를 새로
+# 만들지 않는다. 파일명·`--plain-name`이 매번 달라지는 것과 정반대 성질이다.
+#
+# **예외를 늘리지 말 것.** 하나가 고정 문자열이라 안전한 것이지,
+# `--reporter <아무거나>`를 열면 다시 매번 달라진다.
+ALLOWED_EXACT = {"flutter test --reporter failures-only"}
+
 REASON = (
     "`flutter test`에 인자를 붙이지 말 것 — **맨몸 전체 실행이 더 싸다.**\n"
     "  허용 규칙은 정확 일치만 걸리는데 파일명·`--plain-name`은 매번 달라져\n"
     "  **호출마다 새 확인 창**이 뜬다 (실측: 전체 450건 27초 vs 파일 하나 158~206초).\n"
     "  → 그냥 `flutter test`를 부른다. 실패한 테스트는 전체 실행에도 그대로 나온다.\n"
-    "  변이 확인도 마찬가지다 — 어느 테스트가 실패하는지 전체 출력에서 보면 된다.\n"
-    "  정말 인자가 필요하면 **사용자에게 말하고 승인을 받는다.**"
+    "  출력이 길어 실패만 보고 싶으면 **`flutter test --reporter failures-only`** —\n"
+    "  이 한 형태만 예외로 열려 있다(문자열이 고정이라 프롬프트를 안 만든다).\n"
+    "  정말 다른 인자가 필요하면 **사용자에게 말하고 승인을 받는다.**"
 )
 
 
 def blocked(command: str) -> bool:
     """이 명령을 막아야 하는가. 테스트가 이 함수를 직접 부른다."""
+    if (command or "").strip() in ALLOWED_EXACT:
+        return False
     return bool(TARGETED.match(command or ""))
 
 

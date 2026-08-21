@@ -42,6 +42,9 @@ def test_인자가_붙으면_막는다(command):
     "flutter test",                      # ★ 권장하는 대체 수단이다. 막으면 안 된다
     "flutter test ",                     # 뒤 공백만
     "  flutter test  ",
+    # ★ 딱 하나 판 예외 — 문자열이 고정이라 정확 일치 규칙으로 덮인다.
+    "flutter test --reporter failures-only",
+    "  flutter test --reporter failures-only  ",
     "flutter analyze",                   # 다른 하위 명령은 건드리지 않는다
     "flutter build apk --release --split-per-abi",
     "flutter pub get",
@@ -55,6 +58,20 @@ def test_정상_호출은_막지_않는다(command):
 
 def test_빈_명령은_막지_않는다():
     assert not blocked("")
+
+
+# ── 예외가 새지 않는가 — 이 변경의 유일한 위험이다 ──────────────────────────
+
+@pytest.mark.parametrize("command", [
+    "flutter test --reporter compact",              # 다른 리포터는 안 된다
+    "flutter test --reporter expanded",
+    "flutter test --reporter failures-only --plain-name x",   # 뒤에 더 붙으면 안 된다
+    "flutter test test/x_test.dart --reporter failures-only",  # 앞에 파일이 붙어도
+    "flutter test --reporter failures-only 2>&1",   # 출력 필터가 붙어도
+])
+def test_예외는_그_한_형태뿐이다(command):
+    """`--reporter <아무거나>`를 열면 다시 매번 달라져 프롬프트가 살아난다."""
+    assert blocked(command)
 
 
 # ── 훅을 실제로 파이프로 돌려 본다 (스킬 요구사항) ───────────────────────────

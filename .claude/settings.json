@@ -21,6 +21,7 @@
       "Bash(git add -A)",
       "Bash(git commit -F .commit_msg.txt)",
       "PowerShell(flutter test)",
+      "PowerShell(flutter test --reporter failures-only)",
       "PowerShell(flutter analyze)",
       "PowerShell(flutter doctor)",
       "PowerShell(flutter devices)",
