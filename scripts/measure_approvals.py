@@ -233,13 +233,14 @@ def head_command(segment: str) -> str:
 # ── 허용 규칙 ───────────────────────────────────────────────────────────────
 
 def load_rules() -> dict[str, list[str]]:
-    """{'Bash': [...], 'PowerShell': [...]} — 두 설정 파일을 **합쳐서** 읽는다.
+    """{'Bash': [...], 'PowerShell': [...]} — **`settings.local.json`만** 읽는다.
 
-    한쪽만 보면 안 된다: local에 쌓인 규칙이 project 쪽을 덮는 것처럼 보이는 오진이 실제로 있었다.
+    `settings.json`의 `allow`는 이 환경에서 효력이 없다(hanjadic 2026-08-22 실측 — 세션 전부터
+    있던 규칙이 물었다). 거기 적힌 규칙을 세면 "허용됐을 것"을 과대 예측한다.
     """
     rules: dict[str, list[str]] = {"Bash": [], "PowerShell": []}
     seen: set[str] = set()
-    for name in ("settings.json", "settings.local.json"):
+    for name in ("settings.local.json",):
         path = ROOT / ".claude" / name
         if not path.exists():
             continue
@@ -398,9 +399,10 @@ def main() -> int:
               "   (상한 추정용 — 아래 참조)")
 
     if candidates:
-        print("\n[읽기 전용 후보] ★ `명령 *` 와일드카드 규칙은 무효다(Bash·PowerShell 모두 실측).")
-        print("  규칙을 늘리지 말고 ① 반복되는 호출 문자열을 고정하고 ② '다시 묻지 않기'로")
-        print("  정확 일치를 쌓아라. PowerShell 파이프 꼬리로만 쓰인 것은 애초에 검사되지 않는다.")
+        print("\n[읽기 전용 후보] ★ 규칙은 settings.local.json에만 효력이 있다(settings.json의 allow는 무효).")
+        print("  와일드카드는 작동하지만 패턴에 역슬래시가 있으면 죽는다 — 경로는 슬래시로.")
+        print("  인자가 매번 달라지는 자리에만 `명령 *`를 좁게 열고, 나머지는 호출 문자열을 고정해라.")
+        print("  PowerShell 파이프 꼬리로만 쓰인 것은 애초에 검사되지 않는다 — 앞머리를 봐라.")
         for name, n in st["readonly_missing"].most_common():
             hint = ""
             first = st["readonly_as_first"][name]

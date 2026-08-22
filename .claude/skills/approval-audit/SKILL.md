@@ -45,7 +45,7 @@ python scripts/measure_approvals.py
 |---|---|---|
 | **형태** (`cd <루트> &&` 등) | 호출 방식을 고친다. 반복되면 **PreToolUse 훅**으로 강제 | ✗ |
 | **셸제어문** (`for`/`do`/`done`) | 셸 루프를 **파이썬으로** 옮긴다 | ✗ |
-| **읽기전용** (grep·sed·wc…) | 반복되는 **정확한 호출 문자열**을 고정하고, "다시 묻지 않기"로 정확 일치 규칙을 쌓는다. **`명령 *` 와일드카드는 무효**(두 도구 모두 실측) — 넣지 않는다 | △ (정확 일치만) |
+| **읽기전용** (grep·sed·wc…) | 인자가 매번 달라지는 자리면 **`settings.local.json`에** `명령 *`로 좁게 연다(슬래시 경로). 아니면 호출 문자열을 고정한다. **`settings.json`의 allow는 효력이 없다** — 거기 넣지 않는다 | △ (local에만) |
 | **상태변경** (rm·tar·pip…) | **아무것도 하지 않는다** — 묻는 것이 맞다 | ✗ |
 | **판단필요** | 사람이 본다. 기본값은 "안 연다" | 사용자 확인 후 |
 
@@ -66,8 +66,8 @@ python scripts/measure_approvals.py
 
 ### 4. 반영
 
-- 규칙: `.claude/settings.json`의 `permissions.allow`. **`settings.local.json`도 함께 본다** —
-  거기 쌓인 규칙이 있으면 project 쪽만 고쳐도 효과가 달라 보인다.
+- 규칙: **`.claude/settings.local.json`의 `permissions.allow`에만** 넣는다 — `settings.json`의
+  `allow`는 이 환경에서 효력이 없다(실측). 패턴에 역슬래시를 쓰지 않는다(슬래시 경로).
 - 훅: `.claude/hooks/no_redundant_cd.py`는 **이미 동봉·등록돼 있다**(settings.json의 hooks —
   경로는 `$CLAUDE_PROJECT_DIR` 변수를 쓴다. 훅이 안 도는 것 같으면 그 변수가 해석되는지부터
   확인하고, 안 되면 절대 경로로 바꾼다). 새 훅을 만들면 **반례까지 파이프 테스트하고 넣는다**
