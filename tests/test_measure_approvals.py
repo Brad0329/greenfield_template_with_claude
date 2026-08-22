@@ -148,6 +148,26 @@ def test_별표_없는_규칙은_정확일치다():
     assert allowed("git commit -F .commit_msg.txt 2>&1", ["git commit -F *"])
 
 
+def test_공백_없는_꼬리_별표도_받는다():
+    """★ 2026-08-22 실사례: 규칙을 `X`+`X *` 두 줄에서 `X*` 한 줄로 합치자 분석기가
+    그 규칙을 **통째로 못 보고** `git commit` 13건을 '물었을 것'으로 세었다(실제로는 안 물었다).
+
+    규칙 문법은 하네스와 `allowed()` 두 곳에 구현돼 있다 — 조용히 어긋나는 자리라 대조한다.
+    """
+    rules = ["python scripts/measure_wait.py*"]
+    assert allowed("python scripts/measure_wait.py", rules)          # 맨몸
+    assert allowed("python scripts/measure_wait.py --grep x", rules)  # 공백 뒤 인자
+    assert allowed("python scripts/measure_wait.py--grep=x", rules)   # ★ 공백 없이 붙는 형태
+    # 넓히기만 하면 안 된다 — 다른 스크립트까지 덮으면 규칙이 거짓말이 된다
+    assert not allowed("python scripts/measure_approvals.py", rules)
+
+
+def test_공백_있는_별표는_공백_없는_형태를_안_덮는다():
+    """`X *`와 `X*`의 의미 차이를 굳힌다. 이걸 뭉개면 규칙이 조용히 넓어진다."""
+    assert not allowed("python scripts/measure_wait.py--grep=x",
+                       ["python scripts/measure_wait.py *"])
+
+
 def test_경로가_붙은_실행파일은_이름만_본다():
     assert head_command("C:/tools/adb.exe devices") == "adb"
     assert head_command("python scripts/x.py") == "python"

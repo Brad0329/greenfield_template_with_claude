@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -108,6 +109,8 @@ def test_입력이_깨져도_막지_않는다():
         capture_output=True,
         text=True,
         encoding="utf-8",
+        # 자식의 stderr 인코딩을 고정한다 — 이유는 test_no_output_filter.py 같은 자리 참조.
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
     )
     assert p.returncode == 0
     assert p.stdout.strip() == ""          # deny를 내지 않는다

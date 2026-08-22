@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -90,6 +91,10 @@ def test_입력이_깨져도_막지_않는다():
         capture_output=True,
         text=True,
         encoding="utf-8",
+        # 자식의 stderr 인코딩을 고정한다. 물려받으면 PowerShell 도구(utf-8 설정됨)에서는
+        # 통과하고 Bash 도구(미설정 → cp949)에서는 디코드 실패로 stderr가 None이 된다
+        # (2026-08-22 실측). 인코딩 자체의 회귀는 test_hook_io.py가 cp949 고정으로 본다.
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
     )
     assert p.returncode == 0
     assert p.stdout.strip() == ""          # deny를 내지 않는다

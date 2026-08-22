@@ -18,9 +18,10 @@
 import에 실패하면 **막지 않고 통과**시킨다 — 훅 결함이 도구 사용을 봉쇄하면 안 된다.
 """
 
-import json
 import sys
 from pathlib import Path
+
+from hook_io import deny, read_command
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -41,22 +42,11 @@ def main() -> int:
         print(f"no_redundant_cd: 패턴 import 실패로 통과시킨다 ({e})", file=sys.stderr)
         return 0
 
-    try:
-        data = json.load(sys.stdin)
-    except Exception:
-        # 훅이 입력을 못 읽었다고 도구를 막지 않는다. 조용히 통과시키되 이유를 남긴다.
-        print("no_redundant_cd: 훅 입력을 읽지 못해 통과시킨다", file=sys.stderr)
+    command = read_command("no_redundant_cd")
+    if command is None:
         return 0
-
-    command = (data.get("tool_input") or {}).get("command", "")
     if REDUNDANT_CD_COMMAND.match(command):
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": REASON,
-            }
-        }, ensure_ascii=False))
+        deny(REASON)
     return 0
 
 

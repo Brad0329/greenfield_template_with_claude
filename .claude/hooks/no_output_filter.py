@@ -23,7 +23,13 @@ Windows PowerShell 5.1에서는 네이티브 exe의 stderr를 리다이렉트하
 
 **막지 않는 것**:
   - `| Out-File`·`| ConvertFrom-Json` 등 **자르기가 아닌** 파이프.
-  - Bash 도구의 호출. 여기서 재지 않았으므로 단정하지 않는다(matcher가 PowerShell이다).
+  - `2>/dev/null` 같은 **버리기** 리다이렉트. 재본 적이 없어 건드리지 않는다(YAGNI).
+  - `| head`·`| tail` 등 Bash 쪽 자르기 관용구. 마찬가지로 재본 적이 없다 —
+    **패턴을 넓히지 않는다.** 넓히려면 먼저 실측한다.
+
+**matcher는 `Bash|PowerShell` 둘 다다** (2026-08-22 확장). 원래 PowerShell에만 걸려 있었는데,
+같은 습관을 Bash 도구로 부르면 그대로 통과하는 구멍이었다. `2>&1`은 Bash에서도 불필요하다 —
+이 도구들은 stderr를 이미 함께 돌려준다.
 
 **출력이 정말 클 때는 어떻게 하나** — 그냥 받는다. 하네스가 큰 출력을 파일로 떨궈 주고
 그 경로를 알려 준다. 그 파일을 `Read`/`Grep`으로 보면 된다(2026-08-20에 `flutter test`
@@ -33,9 +39,10 @@ Windows PowerShell 5.1에서는 네이티브 exe의 stderr를 리다이렉트하
 (`no_redundant_cd.py`와 같은 원칙).
 """
 
-import json
 import re
 import sys
+
+from hook_io import deny, read_command
 
 # `| Select-String …` / `| Select-Object …` (PowerShell은 대소문자를 안 가린다)
 # 그리고 어디에 있든 `2>&1`.
@@ -61,21 +68,11 @@ def blocked(command: str) -> bool:
 
 
 def main() -> int:
-    try:
-        data = json.load(sys.stdin)
-    except Exception:
-        # 훅이 입력을 못 읽었다고 도구를 막지 않는다. 조용히 통과시키되 이유를 남긴다.
-        print("no_output_filter: 훅 입력을 읽지 못해 통과시킨다", file=sys.stderr)
+    command = read_command("no_output_filter")
+    if command is None:
         return 0
-
-    if blocked((data.get("tool_input") or {}).get("command", "")):
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": REASON,
-            }
-        }, ensure_ascii=False))
+    if blocked(command):
+        deny(REASON)
     return 0
 
 

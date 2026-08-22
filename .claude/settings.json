@@ -20,19 +20,14 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell",
         "hooks": [
           {
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/no_redundant_cd.py\"",
             "timeout": 10,
             "statusMessage": "cd 접두사 검사"
-          }
-        ]
-      },
-      {
-        "matcher": "PowerShell",
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/no_output_filter.py\"",
@@ -44,6 +39,12 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/no_targeted_flutter_test.py\"",
             "timeout": 10,
             "statusMessage": "flutter test 인자 검사"
+          },
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/no_inline_python.py\"",
+            "timeout": 10,
+            "statusMessage": "인라인 파이썬 검사"
           }
         ]
       }

@@ -35,9 +35,10 @@ r"""`flutter test`에 인자를 붙이면 막는다 — 맨몸 전체 실행이 
 Flutter를 안 쓰는 프로젝트면 이 훅과 settings.json의 등록을 지운다.
 """
 
-import json
 import re
 import sys
+
+from hook_io import deny, read_command
 
 # `flutter test` 뒤에 **무언가 더 있는** 형태. 맨몸(뒤에 공백뿐)은 통과시킨다.
 TARGETED = re.compile(r"^\s*flutter\s+test\s+\S")
@@ -72,21 +73,11 @@ def blocked(command: str) -> bool:
 
 
 def main() -> int:
-    try:
-        data = json.load(sys.stdin)
-    except Exception:
-        # 훅이 입력을 못 읽었다고 도구를 막지 않는다. 조용히 통과시키되 이유를 남긴다.
-        print("no_targeted_flutter_test: 훅 입력을 읽지 못해 통과시킨다", file=sys.stderr)
+    command = read_command("no_targeted_flutter_test")
+    if command is None:
         return 0
-
-    if blocked((data.get("tool_input") or {}).get("command", "")):
-        print(json.dumps({
-            "hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": REASON,
-            }
-        }, ensure_ascii=False))
+    if blocked(command):
+        deny(REASON)
     return 0
 
 
