@@ -87,7 +87,7 @@ scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · meas
 
 | 위치 | 내용 |
 |---|---|
-| **CLAUDE.md** | 매 작업마다 지켜야 할 규칙·정책·함정 목록. 짧게, 링크 위주 |
+| **CLAUDE.md** | 매 작업마다 지켜야 할 규칙·정책·함정 목록. 짧게, 링크 위주. **상한 ~15KB** — 넘으면 이관(본문 'CLAUDE.md 비대화 방지') |
 | **docs/REQUIREMENTS.md** | 기능 요구사항 + 수용 기준의 단일 원본 (+ ID 대장은 CLAUDE.md) |
 | **docs/SCHEMA.md** | 스키마 변경 **결정**과 이유, 승인 게이트 (현재 상태는 코드가 정답) |
 | **work_log/plan.md** | 전체 계획·Phase 체크리스트·**보류 항목**의 단일 원본 |
