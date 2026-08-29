@@ -29,7 +29,7 @@ CLAUDE.md                        ← 규칙·정책. 초기화 체크리스트 �
 docs/REQUIREMENTS.md             ← 요구사항 단일 원본 (제일 먼저 채울 것)
 docs/SCHEMA.md                   ← 스키마 변경 결정 기록 + 승인 게이트
 docs/playbooks/_TEMPLATE.md      ← 사고 1건 = 파일 1개 (새 사고는 이 형식으로 추가)
-docs/playbooks/노하우_*.md       ← 스택 중립 노하우 5종 — 항상 유지
+docs/playbooks/노하우_*.md       ← 스택 중립 노하우 6종 — 항상 유지
 docs/playbooks/팩_*.md           ← 선택형 스택 팩 5종 — 해당 없으면 초기화 때 삭제
 work_log/plan.md                 ← 전체 계획 단일 원본
 work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
@@ -52,6 +52,7 @@ scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · meas
 | `노하우_설계` | 데이터 수명·실패 처리·보안 기본값·구조 | 유지 |
 | `노하우_외부API_데이터` | 문서 대신 실측 — 200이 성공이 아닐 수 있다 | 유지 |
 | `노하우_프로세스` | 기록 시점·상태 어휘·커밋 단위·"문서는 두 번째 방어선" | 유지 |
+| `노하우_작업_트랙` | 저위험/일반 트랙 — 기준은 "되돌리기 비용". 판이 세 번 바뀐 역사 | 유지 |
 | `팩_Flutter_Android` | 모바일 앱 빌드·위젯 테스트·플랫폼 함정 | 해당 없으면 삭제 |
 | `팩_Windows_PowerShell` | 인코딩·PowerShell·Windows 함정 | 해당 없으면 삭제 |
 | `팩_웹_PWA` | 서비스워커·보안 컨텍스트·MIME | 해당 없으면 삭제 |
