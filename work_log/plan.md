@@ -1,6 +1,7 @@
 # <프로젝트명> 전체 계획 (단일 원본)
 
-> PLAN MODE에서 최초 작성/주요 변경 시 갱신. Phase 완료 시 메인 agent가 체크박스 `[x]` + `Phase_XXX.md` 작성.
+> PLAN MODE에서 최초 작성/주요 변경 시 갱신. Phase 완료 시 메인 agent가 체크박스 `[x]` + 완료일.
+> `Phase_XXX.md`는 실패한 접근·버린 대안이 있을 때만 만든다.
 
 ## 시스템 개요
 - <무엇을 하는 시스템, 누가 쓰는지, 핵심 플로우 한 단락> (요구사항 상세는 docs/REQUIREMENTS.md)

@@ -93,7 +93,7 @@ scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · meas
 | **docs/REQUIREMENTS.md** | 기능 요구사항 + 수용 기준의 단일 원본 (+ ID 대장은 CLAUDE.md) |
 | **docs/SCHEMA.md** | 스키마 변경 **결정**과 이유, 승인 게이트 (현재 상태는 코드가 정답) |
 | **work_log/plan.md** | 전체 계획·Phase 체크리스트·**보류 항목**의 단일 원본 |
-| **work_log/Phase_XXX.md** | "코드에서 알 수 없는 것만" — 결정 이유·외부 제약·**실패한 접근**·운영 주의점 |
+| **work_log/Phase_XXX.md** | **실패한 접근·버린 대안이 있을 때만.** 2절: 실패한 접근과 원인 / 다음 세션이 알아야 할 것. 검증 결과는 커밋 메시지에 |
 | **docs/playbooks/*.md** | 증상→원인→해결 상세. 사고 한 번 = 파일 하나 |
 | **개인 메모리** | 접속정보, 개인 노하우 — **git에 안 들어가는 것** |
 
@@ -112,14 +112,14 @@ scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · meas
 | `qa-tester` | Phase 완료 | 통합 테스트 게이트(foreground). 코드를 고치지 않고 판정만 |
 
 **환경에 따라 서브에이전트 호출이 안 될 수 있다.** 그때는 CLAUDE.md '검증 게이트' 표의
-대체 수단으로 가되, **검증 자체를 건너뛰지 않고 그 사실을 작업 로그에 남긴다.**
+대체 수단으로 가되, **검증 자체를 건너뛰지 않고 그 사실을 커밋 메시지에 남긴다.**
 
 ## Phase 사이클
 
 ```
 plan.md에서 Phase 확인 → 수용 기준 확정(REQUIREMENTS.md) → 구현
 → 전체 테스트 통과 → 수용 기준 대조 → (가능하면 /code-review)
-→ plan.md 체크 [x] + Phase_XXX.md 작성 → 다음 Phase
+→ plan.md 체크 [x] (+ 실패한 접근·버린 대안이 있으면 Phase_XXX.md) → 다음 Phase
 ```
 
 **가장 위험한 것을 먼저 한다.** 쉬운 것부터 하면 나중에 못 하는 걸 발견한다.
