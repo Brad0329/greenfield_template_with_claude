@@ -1,6 +1,6 @@
 ---
 name: spec-checker
-description: 구현 완료된 기능을 docs/REQUIREMENTS.md의 수용 기준과 대조해 누락/이탈 목록을 반환하는 검증가. 기능 이식 완료 직후, Phase 완료 시 사용. 특히 수용 기준 누락, 조용한 스코프 축소, 요구사항에 없는 임의 추가를 찾는다.
+description: 구현 완료된 기능을 docs/REQUIREMENTS.md의 수용 기준과 대조해 누락/이탈 목록을 반환하는 검증가. 기능 구현 완료 직후, Phase 완료 시 사용. 특히 수용 기준 누락, 조용한 스코프 축소, 요구사항에 없는 임의 추가를 찾는다.
 tools: Read, Grep, Glob, Bash
 ---
 
