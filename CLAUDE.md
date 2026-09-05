@@ -15,8 +15,10 @@
 2. **프로젝트 정체성** — 이름 / 한 줄 설명 / 기술 스택을 물어 이 파일의 `<...>`를 채운다.
 3. **버전 관리** — `git init` 여부를 묻고, **원격을 둘지 묻는다**(배포·백업·협업·`/security-review`에
    필요하다). 둔다면 GitHub 공개/비공개를 묻고 `gh repo create --private --source=. --push`류로
-   만들어 push까지 한다. 안 둔다면 plan.md '미정'에 그 결정과 날짜를 남긴다 — 나중에 보안 점검이
-   안 되는 이유가 거기 있어야 한다.
+   만들어 push까지 한다 — **`gh`가 없는 환경이 흔하다**(실측): 그때는 사용자가 GitHub 웹에서 빈
+   저장소를 만들고 URL을 주면 `git remote add origin <url>` + `git push -u origin master`로 잇는다.
+   안 둔다면 plan.md '미정'에 그 결정과 날짜를 남긴다 — 나중에 보안 점검이 안 되는 이유가 거기
+   있어야 한다.
 4. **`.gitignore`** — 스타터 파일이 동봉돼 있다(`settings.local.json`·`.env`·`.commit_msg.txt`).
    이 스택의 빌드 산출물·원본 데이터를 추가한다.
 5. **★ 스택 기본값 채우기 — 이 단계를 건너뛰지 말 것.** 템플릿에서 물려받은 기본값은 이 프로젝트
@@ -28,10 +30,12 @@
      정답 패턴을 받는다.
    - **허용 기준을 확인한다** — 기본값은 "파괴적이지 않으면 연다"(불변 규칙 참조). 1인·서버
      없음 전제 — 협업·운영 서버가 있으면 사용자에게 기준을 다시 묻는다.
-   - **훅 4종을 선별하고**(Flutter 아니면 `no_targeted_flutter_test` 삭제), **막히는 명령을
-     일부러 한 번 불러 실제로 도는지 확인한다** — 죽은 훅과 정상 훅은 통과 쪽 증상이 같다
-     (훅 4개가 cp949로 죽은 채 초록불이었던 실측). `$CLAUDE_PROJECT_DIR`가 빈 환경이면
-     훅 경로를 절대 경로(슬래시)로.
+   - **훅 4종을 선별한다.** Flutter가 아니면 `no_targeted_flutter_test`를 **세 곳에서** 지운다 —
+     `.claude/hooks/` 파일, `settings.json`의 hooks 항목, `tests/test_no_targeted_flutter_test.py`
+     (`test_hook_io.py`는 파일이 없으면 자동으로 뺀다). 남긴 훅은 **막히는 명령을 일부러 한 번 불러
+     실제로 도는지 확인한다** — 죽은 훅과 정상 훅은 통과 쪽 증상이 같다(훅 4개가 cp949로 죽은 채
+     초록불이었던 실측). `$CLAUDE_PROJECT_DIR`가 빈 환경이면 훅 경로를 절대 경로(슬래시)로.
+     마지막에 `python -m pytest tests/`가 초록인지 본다.
    - 아래 '테스트 규칙'과 '배포 체크리스트'의 `<...>`를 이 스택의 실제 명령으로 채운다.
 6. **★ 해당 없는 팩 삭제** — `docs/playbooks/`의 `팩_*.md`는 선택형이다(Flutter_Android ·
    Windows_PowerShell · 웹_PWA · MCP · LLM_생성기능). 이 프로젝트에 해당 없는 팩을 지운다.

@@ -32,8 +32,15 @@ CASES = [
     ("no_redundant_cd.py", f"cd {ROOT.as_posix()} && git log --oneline -1", "cd app"),
     ("no_output_filter.py", "flutter test 2>&1 | Select-Object -Last 12", "flutter test"),
     ("no_inline_python.py", 'python -c "print(1)"', "python scripts/measure_wait.py"),
+]
+
+# 선택형 훅 — 초기화 때 Flutter가 아니면 파일째 지운다(CLAUDE.md 초기화 5번). 지웠으면 여기서도
+# 자동으로 빠진다. 위 3종은 스택 중립이라 항상 있어야 하고, 없으면 그대로 실패한다(조용히 빼지 않는다).
+# 2026-09-05 초기화 시뮬레이션에서 이 훅을 지우자 이 파일의 4건이 "파일 없음"으로 죽은 실사례.
+_OPTIONAL = [
     ("no_targeted_flutter_test.py", "flutter test test/x_test.dart", "flutter test"),
 ]
+CASES += [c for c in _OPTIONAL if (HOOKS / c[0]).exists()]
 
 HOOK_IDS = [c[0] for c in CASES]
 
