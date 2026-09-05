@@ -16,7 +16,8 @@
 - [ ] Phase 001: 요구사항/설계 확정 (REQUIREMENTS.md 초안 + 아키텍처 결정 + **데이터 소스 실측 검증**)
 - [ ] Phase 002: 프로젝트 세팅
   - **디렉토리 뼈대 확정** → **확정본을 CLAUDE.md '구조' 섹션에 기록** (이후 파일 생성 위치의 최종 기준)
-  - **`.claude/settings.json`의 allow를 이 스택의 실제 명령으로 채우기** (비어 있다)
+  - **허용 규칙을 `.claude/settings.local.json`에 만들기** — `settings.json`의 `allow`는 효력이
+    없다(실측). `노하우_승인_대기_최소화.md`의 스타터를 붙여 넣고 이 스택에 없는 줄을 뺀다
   - 테스트 러너 동작 확인 · docs/SCHEMA.md 초안
 - [ ] Phase 003: MVP 코어 — <가장 위험한/불확실한 기능 먼저>
 - [ ] Phase 00N: <기능 확장 — 도메인별로 분할>
