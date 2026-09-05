@@ -36,7 +36,7 @@ work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
 .claude/agents/*.md              ← 선택적 에이전트 4종 (검증 3 + 조사 1)
 .claude/skills/approval-audit/   ← /approval-audit — Phase 종료 시 승인 대기 원인 점검 (파이썬 3.10+)
 .claude/skills/debt-audit/       ← /debt-audit — Phase 3~5개마다 부채 점검(반복 실수·중복 로직·복수 원본). 목록만, 결정은 사용자
-.claude/hooks/*.py               ← 습관 차단 훅 3종: cd 접두사·출력 필터·flutter test 인자 (settings.json에 등록)
+.claude/hooks/*.py               ← 습관 차단 훅 4종: cd 접두사·출력 필터·flutter test 인자·인라인 파이썬 (settings.json에 등록)
 scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · measure_wait.py ← 벽시계 실측 (테스트 동봉)
 .claude/settings.json            ← deny(안전장치) + 훅 등록. allow는 비어 있다 — 규칙은 settings.local.json에(효력이 거기만 있다)
 ```
