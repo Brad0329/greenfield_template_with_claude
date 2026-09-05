@@ -20,8 +20,8 @@
   USB 명령을 막기도 한다.
 - **adb는 PATH에 없다 — 전체 경로를 글자 그대로(리터럴) 쓴다.** `& (Join-Path …)` 같은
   변수 시작 형태는 허용 규칙에 안 걸려 매번 확인을 묻는다(실측 대기 77.8초, adb 실행은 2~5초).
-  허용 규칙도 그 리터럴 경로로 등록한다 — 템플릿 settings.json에 4종(devices/install/logcat/shell)이
-  들어 있다.
+  허용 규칙도 그 리터럴 경로로 `settings.local.json`에 등록한다(`settings.json`의 allow는 무효) —
+  `노하우_승인_대기_최소화.md` §5 스타터에 3종(devices/install/logcat)이 들어 있다.
 
 ## 테스트
 
