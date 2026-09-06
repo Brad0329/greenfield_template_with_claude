@@ -36,7 +36,8 @@
      `.claude/hooks/` 파일, `settings.json`의 hooks 항목, `tests/test_no_targeted_flutter_test.py`
      (`test_hook_io.py`는 파일이 없으면 자동으로 뺀다). 남긴 훅은 **막히는 명령을 일부러 한 번 불러
      실제로 도는지 확인한다** — 죽은 훅과 정상 훅은 통과 쪽 증상이 같다(훅 4개가 cp949로 죽은 채
-     초록불이었던 실측). `$CLAUDE_PROJECT_DIR`가 빈 환경이면 훅 경로를 절대 경로(슬래시)로.
+     초록불이었던 실측). `$CLAUDE_PROJECT_DIR`는 환경에 따라 비기도 채워지기도 한다 — 막히는 명령이
+     안 막히면 훅 경로를 절대 경로(슬래시)로.
      마지막에 `python -m pytest tests/`가 초록인지 본다.
    - 아래 '테스트 규칙'과 '배포 체크리스트'의 `<...>`를 이 스택의 실제 명령으로 채운다.
 6. **★ 해당 없는 팩 삭제** — `docs/playbooks/`의 `팩_*.md`는 선택형이다(Flutter_Android ·
