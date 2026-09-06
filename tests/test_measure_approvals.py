@@ -168,6 +168,25 @@ def test_공백_있는_별표는_공백_없는_형태를_안_덮는다():
                        ["python scripts/measure_wait.py *"])
 
 
+def test_콜론_별표는_공백_별표와_같다():
+    """★ vanasso.kr 2026-09-06 실사례: local의 규칙 97건 대부분이 `Bash(node:*)`·`Bash(git add:*)`처럼
+    **콜론+별표** 형태였는데 분석기가 이 문법을 몰라 정확 일치로 취급 → "51건 중 51건 승인 필요(100%)"라는
+    거짓 보고서. 공식 문서: "`:*` 접미사는 꼬리 ` *`와 동등하다 — `Bash(ls:*)`는 `Bash(ls *)`와 같은
+    명령을 매칭한다"(code.claude.com/docs/en/permissions, 패턴 끝에서만 인식)."""
+    assert allowed("node script.js", ["node:*"])
+    assert allowed("node", ["node:*"])                  # 맨몸도 덮는다 (` *`와 동등)
+    assert allowed("git add -A", ["git add:*"])
+    assert allowed("git add", ["git add:*"])
+    assert not allowed("nodemon x", ["node:*"])         # 공백 경계 — `node *`와 같은 의미
+    assert not allowed("git addx", ["git add:*"])
+
+
+def test_콜론_별표는_끝에서만_와일드카드다():
+    """공식 문서: `Bash(git:* push)`의 콜론은 리터럴이다 — 가운데 `:*`를 와일드카드로 풀면 규칙이 넓어진다."""
+    assert not allowed("git commit push", ["git:* push"])
+    assert allowed("git:* push", ["git:* push"])        # 리터럴 정확 일치
+
+
 def test_경로가_붙은_실행파일은_이름만_본다():
     assert head_command("C:/tools/adb.exe devices") == "adb"
     assert head_command("python scripts/x.py") == "python"

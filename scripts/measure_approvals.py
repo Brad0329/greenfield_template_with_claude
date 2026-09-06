@@ -277,12 +277,18 @@ def allowed(segment: str, rules: list[str], extra: list[str] = ()) -> bool:
       - `cmd *` : 맨몸 `cmd`와 `cmd <무엇이든>` (원래 지원하던 형태)
       - `cmd*`  : `cmd`로 시작하는 전부 — `cmd--flag`처럼 **공백 없이 붙는 형태**까지
 
+      - `cmd:*` : **`cmd *`와 동등** (공식 문서: "`:*` 접미사는 꼬리 ` *`와 같다", 패턴 끝에서만)
+
     ★ 2026-08-22 실측: ` *`만 처리하던 시절에 규칙을 `X*`로 합치자 **분석기가 그 규칙을
     통째로 못 보고** `git commit` 13건을 '물었을 것'으로 세었다(실제로는 안 물었다).
+    ★ 2026-09-06 vanasso.kr: local 규칙 97건 대부분이 `Bash(node:*)`류였는데 `:*`를 몰라
+    **51건 전부 '승인 필요'라는 거짓 보고서**를 냈다 — 같은 자리에서 두 번째.
     **규칙 문법이 하네스와 여기 두 곳에 구현돼 있어 조용히 어긋나는 자리다**
     (CLAUDE.md '같은 규칙이 두 곳 이상에 구현되면'). 규칙 문법을 바꾸면 여기도 같이 본다.
     """
     for rule in list(rules) + list(extra):
+        if rule.endswith(":*"):
+            rule = rule[:-2] + " *"     # 공식 문법: 꼬리 `:*` == 꼬리 ` *` (가운데 콜론은 리터럴)
         if rule.endswith("*"):
             body = rule[:-1]                       # `X ` 또는 `X`
             if segment.startswith(body):
