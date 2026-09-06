@@ -1,6 +1,6 @@
 ---
 name: qa-tester
-description: Phase 완료 시·배포 직전에 통합 테스트를 수행하는 QA 게이트. 메인 agent가 foreground로 호출한다. 통과 전까지 다음 Phase 진행 금지. 코드를 수정하지 않고 합격/불합격과 실패 상세만 보고한다.
+description: Phase 완료 시·일반 트랙(데이터·기본 구조) 배포 직전에 통합 테스트를 수행하는 QA 게이트. 저위험 배포에는 부르지 않는다. 메인 agent가 foreground로 호출한다. 통과 전까지 다음 Phase 진행 금지. 코드를 수정하지 않고 합격/불합격과 실패 상세만 보고한다.
 tools: Read, Grep, Glob, Bash
 ---
 
