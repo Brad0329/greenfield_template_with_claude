@@ -78,7 +78,9 @@ def _repo_cd_pattern(root: Path) -> str:
     comps = [c for c in re.split(r"[\\/]+", str(root)) if c]
     first = comps[0]
     if re.fullmatch(r"[A-Za-z]:", first):  # Windows 드라이브 문자 — 대소문자 모두 받는다
-        head = f"[{first[0].upper()}{first[0].lower()}]:"
+        d = first[0]
+        # `C:/…`뿐 아니라 Git Bash(MSYS)의 `/c/…`도 같은 루트다 (vanasso.kr 2026-09-06: 20건 통과)
+        head = f"(?:[{d.upper()}{d.lower()}]:|/[{d.upper()}{d.lower()}])"
     else:
         head = re.escape(first)
     body = "[\\\\/]".join(re.escape(c) for c in comps[1:])
@@ -86,8 +88,12 @@ def _repo_cd_pattern(root: Path) -> str:
 
 
 _REPO_CD = _repo_cd_pattern(ROOT)
-REDUNDANT_CD_SEGMENT = re.compile(_REPO_CD + r"\s*$")
-REDUNDANT_CD_COMMAND = re.compile(_REPO_CD + r"\s*(&&|;)")
+# `cd <루트> 2>/dev/null; …`처럼 경로 뒤에 리다이렉트를 끼운 형태 (vanasso.kr 2026-09-06: 49건 통과)
+_REDIRECTS = r"(?:\s+\d?[<>]{1,2}\S*)*"
+REDUNDANT_CD_SEGMENT = re.compile(_REPO_CD + _REDIRECTS + r"\s*$")
+# 뒤에 `&&`·`;`가 오거나, **구분자 없이 바로 다른 낱말**이 오는 형태(`cd <루트> ls` — bash는
+# "too many arguments"로 죽어 ls는 돌지도 않는다. vanasso.kr 2026-09-06: 99건 통과).
+REDUNDANT_CD_COMMAND = re.compile(_REPO_CD + _REDIRECTS + r"(?:\s*(?:&&|;)|\s+\S)")
 
 # ── 원인 ② 읽기 전용 ────────────────────────────────────────────────────────
 # 상태를 바꾸지 않는 명령만. **여기 없는 것은 자동 제안하지 않는다**(모르면 안 여는 쪽).

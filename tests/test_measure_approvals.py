@@ -61,12 +61,20 @@ def test_빈_조각은_버린다():
 
 # ── ② cd 패턴: 명령용과 조각용이 다르다 ─────────────────────────────────────
 
+REPO_MSYS = "/" + REPO[0].lower() + REPO[2:]   # Git Bash(MSYS) 경로: C:/Users/… → /c/Users/…
+
+
 @pytest.mark.parametrize("command", [
     f"cd {REPO} && python -m pytest tests/",
     f'cd "{REPO}" && git status',
     f"cd {REPO}/ && ls",
     f"cd {REPO}; ls",
     f'cd "{REPO_BS}" && git status',
+    # ★ vanasso.kr 2026-09-06 실측 — 10세션 cd 접두사 1,000건 중 168건이 아래 세 변형으로 훅을 통과했다
+    f"cd {REPO} 2>/dev/null; ls",           # 리다이렉트를 끼운 형태 (49건)
+    f"cd {REPO} ls",                        # 구분자 없음 (99건) — bash는 "too many arguments"로 죽고 ls는 안 돈다
+    f"cd {REPO_MSYS} && ls",                # MSYS 경로 (20건)
+    f"cd {REPO_MSYS} 2>/dev/null && ls",
 ])
 def test_명령_전체에서_불필요한_cd를_잡는다(command):
     assert REDUNDANT_CD_COMMAND.match(command)
@@ -78,9 +86,20 @@ def test_명령_전체에서_불필요한_cd를_잡는다(command):
     "cd ..",
     'cd "C:/Users/user/AppData/Local/Temp/somewhere-else" && ls',
     "python scripts/build_db.py",
+    f"cd {REPO}/scripts && ls",     # 루트 아래 하위로 가는 cd — 대상이 아니다
+    f"cd {REPO}-other && ls",       # 이름이 루트로 시작하는 다른 디렉토리
+    f"cd {REPO}",                   # 단독 cd — 명령용 패턴은 잡으면 안 된다(조각용이 잡는다)
+    f"cd {REPO_MSYS}",
 ])
 def test_정당한_cd와_일반_명령은_안_잡는다(command):
     assert not REDUNDANT_CD_COMMAND.match(command)
+
+
+def test_조각용_패턴도_리다이렉트_변형과_MSYS_경로를_잡는다():
+    """분류(measure_approvals)는 조각 단위로 본다 — 명령용만 넓히면 훅은 막는데 보고서는 '형태 0건'이 된다."""
+    assert REDUNDANT_CD_SEGMENT.match(f"cd {REPO} 2>/dev/null")
+    assert REDUNDANT_CD_SEGMENT.match(f"cd {REPO_MSYS}")
+    assert not REDUNDANT_CD_SEGMENT.match(f"cd {REPO}/scripts")
 
 
 def test_조각용_패턴은_연산자가_없는_형태를_잡는다():
