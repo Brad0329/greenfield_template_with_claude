@@ -122,6 +122,19 @@ SHELL_KEYWORDS = {"for", "do", "done", "while", "if", "then", "else", "elif", "f
                   "case", "esac", "[", "[[", "}"}
 
 
+# ── 출력 ────────────────────────────────────────────────────────────────────
+
+def utf8_stdout() -> None:
+    """콘솔 인코딩과 무관하게 보고서를 찍는다 — 측정기 2종이 **같이** 쓴다.
+
+    vanasso.kr 2026-09-06 실측: 이 한 줄이 `measure_approvals`에만 있고 `measure_wait`에는 없어
+    Bash 도구(cp949, `PYTHONIOENCODING` 없음)에서 `measure_wait`가 `—`(U+2014)에서 죽었다.
+    `hook_io.py`가 고친 훅 사고와 같은 뿌리를 측정기는 한쪽만 고친 것. 그래서 한 곳으로 모은다
+    (CLAUDE.md '같은 규칙이 두 곳 이상에 구현되면'). 회귀: `tests/test_measure_scripts_encoding.py`.
+    """
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+
 # ── 트랜스크립트 ────────────────────────────────────────────────────────────
 
 def transcript_dir() -> Path:
@@ -366,7 +379,7 @@ def main() -> int:
                     help="이 미만이면 표본 부족으로 보고 처방하지 않는다 (기본 100)")
     args = ap.parse_args()
 
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    utf8_stdout()
 
     paths = find_sessions(args.session, args.sessions)
     calls = shell_calls(paths)

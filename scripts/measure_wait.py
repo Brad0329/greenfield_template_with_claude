@@ -41,8 +41,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 # 세션 찾기는 measure_approvals와 **같은 규칙이어야 한다** — 두 스크립트가 다른 세션을 보면
-# 예측과 실측을 대조할 수 없다. 그래서 복사하지 않고 가져다 쓴다.
-from measure_approvals import find_sessions  # noqa: E402
+# 예측과 실측을 대조할 수 없다. 그래서 복사하지 않고 가져다 쓴다. 출력 인코딩도 같은 이유로
+# 한 곳에서 가져온다 — 여기만 빠져 있어 cp949 콘솔에서 죽었다(vanasso.kr 2026-09-06).
+from measure_approvals import find_sessions, utf8_stdout  # noqa: E402
 
 # 도구 이름. 셸 말고 Write/Edit도 본다 — 보호 디렉토리에 쓸 때 확인을 물어서
 # 실제로 137초가 나온 적이 있다(`.git/` 안의 커밋 메시지 파일, hanjadic 2026-08-19).
@@ -102,6 +103,8 @@ def main() -> int:
     ap.add_argument("--slow", type=float, default=8.0, help="이 초를 넘으면 표시 (기본 8)")
     ap.add_argument("--top", type=int, default=25, help="느린 순으로 몇 줄까지 (기본 25)")
     args = ap.parse_args()
+
+    utf8_stdout()
 
     paths = find_sessions(args.session, args.sessions)
     print("[대상 세션]")
