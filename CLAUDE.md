@@ -18,7 +18,8 @@
 3. **버전 관리** — `git init` 여부를 묻고, **원격을 둘지 묻는다**(배포·백업·협업·`/security-review`에
    필요하다). 둔다면 GitHub 공개/비공개를 묻고 `gh repo create --private --source=. --push`류로
    만들어 push까지 한다 — **`gh`가 없는 환경이 흔하다**(실측): 그때는 사용자가 GitHub 웹에서 빈
-   저장소를 만들고 URL을 주면 `git remote add origin <url>` + `git push -u origin master`로 잇는다.
+   저장소를 만들고 URL을 주면 `git remote add origin <url>` + `git push -u origin HEAD`로 잇는다
+   (브랜치 이름을 적지 않는다 — `init.defaultBranch`에 따라 master/main으로 갈린다).
    안 둔다면 plan.md '미정'에 그 결정과 날짜를 남긴다 — 나중에 보안 점검이 안 되는 이유가 거기
    있어야 한다.
 4. **`.gitignore`** — 스타터 파일이 동봉돼 있다(`settings.local.json`·`.env`·`.commit_msg.txt`).
