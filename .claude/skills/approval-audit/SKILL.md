@@ -77,8 +77,8 @@ python scripts/measure_approvals.py
 - 훅: `.claude/hooks/`에 **4종이 동봉·등록돼 있다**(`no_redundant_cd`·`no_output_filter`·
   `no_targeted_flutter_test`·`no_inline_python`). settings.json의 hooks에 **matcher
   `Bash|PowerShell` 한 블록**으로 넷 다 걸려 있다 — **한쪽 셸에만 걸면 반대쪽으로 그대로
-  통과한다**(2026-08-22 실측). 경로는 **절대 경로**를 쓴다(`$CLAUDE_PROJECT_DIR`는 이 환경에서
-  빈 값이었다 — 실측).
+  통과한다**(2026-08-22 실측). 경로의 `$CLAUDE_PROJECT_DIR`는 **환경에 따라 비기도 채워지기도
+  한다** — 막히는 명령이 안 막히면 절대 경로(슬래시)로 바꾼다.
 - 새 훅을 만들면 **반례까지 파이프 테스트하고 넣는다**(`no_redundant_cd`는 `cd app` 단독 호출을
   막으면 안 된다 — 테스트에 반례가 있다). deny 출력은 반드시 `hook_io.deny()`를 쓴다:
   직접 `json.dumps(..., ensure_ascii=False)`로 찍으면 **cp949 콘솔에서 죽어 훅이 통째로
