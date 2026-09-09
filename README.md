@@ -128,7 +128,8 @@ scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · meas
 ```
 plan.md에서 Phase 확인 → 수용 기준 확정(REQUIREMENTS.md) → 구현
 → 전체 테스트 통과 → 수용 기준 대조 → (가능하면 /code-review)
-→ plan.md 체크 [x] (+ 실패한 접근·버린 대안이 있으면 Phase_XXX.md) → 다음 Phase
+→ plan.md 체크 [x] (+ 실패한 접근·버린 대안이 있으면 Phase_XXX.md) → 커밋·push
+→ "새 Phase는 새 세션을 열어 진행하기를 권고합니다" 하고 멈춤 → 새 세션에서 다음 Phase
 ```
 
 **가장 위험한 것을 먼저 한다.** 쉬운 것부터 하면 나중에 못 하는 걸 발견한다.
