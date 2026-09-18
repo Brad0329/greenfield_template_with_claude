@@ -1,4 +1,4 @@
-r"""훅 4개가 공유하는 stdin 읽기 / deny 출력.
+r"""훅들이 공유하는 stdin 읽기 / deny·컨텍스트 주입 출력.
 
 **왜 한 곳으로 모았나 — 훅 4개가 전부 같은 원인으로 죽어 있었다** (2026-08-22 실측):
 
@@ -43,6 +43,16 @@ def read_command(hook_name: str) -> str | None:
         print(f"{hook_name}: 훅 입력을 읽지 못해 통과시킨다 ({e})", file=sys.stderr)
         return None
     return (data.get("tool_input") or {}).get("command", "")
+
+
+def add_context(event_name: str, text: str) -> None:
+    """차단 없이 컨텍스트만 주입한다 (SessionStart 등). `deny`와 같은 이유로 ASCII로만 나간다."""
+    print(json.dumps({
+        "hookSpecificOutput": {
+            "hookEventName": event_name,
+            "additionalContext": text,
+        }
+    }))
 
 
 def deny(reason: str) -> None:

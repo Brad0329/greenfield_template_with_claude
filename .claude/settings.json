@@ -45,6 +45,24 @@
             "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/no_inline_python.py\"",
             "timeout": 10,
             "statusMessage": "인라인 파이썬 검사"
+          },
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/no_scratchpad_path.py\"",
+            "timeout": 10,
+            "statusMessage": "스크래치패드 경로 검사"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_context.py\"",
+            "timeout": 10,
+            "statusMessage": "plan.md 현재 Phase 주입"
           }
         ]
       }
