@@ -74,7 +74,8 @@ ROOT = Path(__file__).resolve().parents[1]
 #   냈다(kanadic 2026-08-19). 원인 분류가 통째로 뒤집히는 자리라 테스트가 두 형태를 다 검사한다.
 
 
-def _repo_cd_pattern(root: Path) -> str:
+def _repo_path_pattern(root: Path) -> str:
+    """저장소 루트 경로 하나를 가리키는 모든 표기(따옴표·슬래시 방향·MSYS)."""
     comps = [c for c in re.split(r"[\\/]+", str(root)) if c]
     first = comps[0]
     if re.fullmatch(r"[A-Za-z]:", first):  # Windows 드라이브 문자 — 대소문자 모두 받는다
@@ -84,7 +85,11 @@ def _repo_cd_pattern(root: Path) -> str:
     else:
         head = re.escape(first)
     body = "[\\\\/]".join(re.escape(c) for c in comps[1:])
-    return rf"""^\s*cd\s+["']?{head}[\\/]{body}[\\/]?["']?"""
+    return rf"""["']?{head}[\\/]{body}[\\/]?["']?"""
+
+
+def _repo_cd_pattern(root: Path) -> str:
+    return r"^\s*cd\s+" + _repo_path_pattern(root)
 
 
 _REPO_CD = _repo_cd_pattern(ROOT)
@@ -94,6 +99,11 @@ REDUNDANT_CD_SEGMENT = re.compile(_REPO_CD + _REDIRECTS + r"\s*$")
 # 뒤에 `&&`·`;`가 오거나, **구분자 없이 바로 다른 낱말**이 오는 형태(`cd <루트> ls` — bash는
 # "too many arguments"로 죽어 ls는 돌지도 않는다. vanasso.kr 2026-09-06: 99건 통과).
 REDUNDANT_CD_COMMAND = re.compile(_REPO_CD + _REDIRECTS + r"(?:\s*(?:&&|;)|\s+\S)")
+
+# `git -C <저장소 루트> …` — cd와 같은 부류다. 이미 루트에 있으니 하는 일이 없는데, `git diff*`류 규칙은
+# `git -C …`에 안 걸려 매번 묻는다(bid-collectors 2026-09-26: 셸 호출 72건, 서브에이전트가 주로).
+# 다른 저장소를 가리키는 `-C`는 정당하다 — 루트 **정확히**일 때만 잡는다(뒤에 공백·끝이 와야 한다).
+REDUNDANT_GIT_C = re.compile(r"(?:^|[\s;&|(])git\s+-C\s+" + _repo_path_pattern(ROOT) + r"(?=\s|$)")
 
 # ── 원인 ② 읽기 전용 ────────────────────────────────────────────────────────
 # 상태를 바꾸지 않는 명령만. **여기 없는 것은 자동 제안하지 않는다**(모르면 안 여는 쪽).
@@ -152,15 +162,30 @@ def transcript_dir() -> Path:
     return Path.home() / ".claude" / "projects" / slug
 
 
+def with_subagents(mains: list[Path]) -> list[Path]:
+    """본 세션마다 그 세션이 띄운 서브에이전트 기록(`<세션ID>/subagents/*.jsonl`)을 붙인다.
+
+    ★ 서브에이전트는 본 세션 파일에 호출이 안 남는다. 본 세션만 세면 **조사·QA를 맡긴 쪽의 대기를
+      통째로 놓친다** — bid-collectors 2026-09-26 실측: 42개 기록 중 8초 초과 셸 호출 340건의
+      57%(194건)가 서브에이전트였고, 최대 원인(`cat >>` 126건)도 거기 있었다.
+    """
+    out: list[Path] = []
+    for m in mains:
+        out.append(m)
+        out.extend(sorted((m.parent / m.stem / "subagents").glob("*.jsonl")))
+    return out
+
+
 def find_sessions(spec: str | None, count: int) -> list[Path]:
+    """본 세션 + 그 서브에이전트 기록. 첫 원소부터 본 세션 순서대로."""
     d = transcript_dir()
     if spec:
         p = Path(spec)
         if p.exists():
-            return [p]
+            return with_subagents([p])
         p = d / f"{spec}.jsonl"
         if p.exists():
-            return [p]
+            return with_subagents([p])
         raise SystemExit(f"세션을 찾지 못했다: {spec}\n  찾아본 곳: {d}")
     if not d.exists():
         raise SystemExit(
@@ -169,7 +194,19 @@ def find_sessions(spec: str | None, count: int) -> list[Path]:
     files = sorted(d.glob("*.jsonl"), key=lambda f: f.stat().st_mtime, reverse=True)
     if not files:
         raise SystemExit(f"세션 파일(.jsonl)이 없다: {d}")
-    return files[:count]
+    return with_subagents(files[:count])
+
+
+def print_sessions(paths: list[Path]) -> None:
+    """[대상 세션] — 본 세션은 한 줄씩, 서브에이전트는 세션별 개수로(측정기 2종이 같이 쓴다)."""
+    print("[대상 세션]")
+    for p in paths:
+        if p.parent.name == "subagents":
+            continue
+        subs = [s for s in paths if s.parent == p.parent / p.stem / "subagents"]
+        size = sum(s.stat().st_size for s in subs)
+        extra = f" + 서브에이전트 {len(subs)}개 ({size / 1e6:.1f} MB)" if subs else ""
+        print(f"  {p.name}  ({p.stat().st_size / 1e6:.1f} MB){extra}")
 
 
 def shell_calls(paths: list[Path]) -> list[tuple[str, str]]:
@@ -323,7 +360,7 @@ def is_readonly(segment: str) -> bool:
 
 
 def classify(segment: str) -> str:
-    if segment.startswith("cd "):
+    if segment.startswith("cd ") or REDUNDANT_GIT_C.search(segment):
         return "형태"
     if head_command(segment) in SHELL_KEYWORDS:
         return "셸제어문"
@@ -396,9 +433,7 @@ def main() -> int:
     paths = find_sessions(args.session, args.sessions)
     calls = shell_calls(paths)
 
-    print("[대상 세션]")
-    for p in paths:
-        print(f"  {p.name}  ({p.stat().st_size / 1e6:.1f} MB)")
+    print_sessions(paths)
 
     if not calls:
         # 0건은 '깨끗함'이 아니다 — 파싱이 깨졌거나 엉뚱한 파일을 봤다는 뜻이다.

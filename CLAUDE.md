@@ -36,7 +36,7 @@
      정답 패턴을 받는다.
    - **허용 기준을 확인한다** — 기본값은 "파괴적이지 않으면 연다"(불변 규칙 참조). 1인·서버
      없음 전제 — 협업·운영 서버가 있으면 사용자에게 기준을 다시 묻는다.
-   - **훅을 선별한다**(차단 5종 + 세션 시작 주입 1종). Flutter가 아니면 `no_targeted_flutter_test`를 **세 곳에서** 지운다 —
+   - **훅을 선별한다**(차단 6종 + 세션 시작 주입 1종). Flutter가 아니면 `no_targeted_flutter_test`를 **세 곳에서** 지운다 —
      `.claude/hooks/` 파일, `settings.json`의 hooks 항목, `tests/test_no_targeted_flutter_test.py`
      (`test_hook_io.py`는 파일이 없으면 자동으로 뺀다). 남긴 훅은 **막히는 명령을 일부러 한 번 불러
      실제로 도는지 확인한다** — 죽은 훅과 정상 훅은 통과 쪽 증상이 같다(훅 4개가 cp949로 죽은 채

@@ -33,6 +33,8 @@ python scripts/measure_approvals.py
 ```
 
 여러 세션을 합치려면 `--sessions 3`. 특정 세션은 `--session <ID 또는 경로>`.
+서브에이전트 기록(`<세션ID>/subagents/`)은 자동으로 합쳐진다 — 조사·QA를 맡긴 쪽이 대기의 절반을
+넘은 실측이 있다(bid-collectors 2026-09-27, 노하우 `[H16]`). `[대상 세션]` 줄에 개수가 찍히는지 본다.
 
 **호출이 0건으로 나오면 '깨끗함'이 아니라 실패다** — 트랜스크립트 형식이 바뀌었거나 엉뚱한
 파일을 본 것이다. 스크립트가 실패로 끝내니 그 메시지를 그대로 사용자에게 전한다.
@@ -74,8 +76,8 @@ python scripts/measure_approvals.py
 
 - 규칙: **`.claude/settings.local.json`의 `permissions.allow`에만** 넣는다 — `settings.json`의
   `allow`는 이 환경에서 효력이 없다(실측). 패턴에 역슬래시를 쓰지 않는다(슬래시 경로).
-- 훅: 동봉 차단 훅은 **최대 5종**(`no_redundant_cd`·`no_output_filter`·`no_inline_python`·
-  `no_scratchpad_path` + 선택형 `no_targeted_flutter_test` — Flutter가 아니면 초기화 때 지운다).
+- 훅: 동봉 차단 훅은 **최대 6종**(`no_redundant_cd`(cd 복합·루트 `git -C`)·`no_output_filter`·`no_inline_python`·
+  `no_scratchpad_path`·`no_shell_file_write` + 선택형 `no_targeted_flutter_test` — Flutter가 아니면 초기화 때 지운다).
   `session_context`는 차단이 아니라 SessionStart 주입 훅이라 이 점검 대상이 아니다. **개수를 외우지 말고
   `.claude/hooks/`의 실제 파일과 settings.json 등록 항목을 대조한다.** 등록은 **matcher
   `Bash|PowerShell` 한 블록**에 모아 둔다 — **한쪽 셸에만 걸면 반대쪽으로 그대로
