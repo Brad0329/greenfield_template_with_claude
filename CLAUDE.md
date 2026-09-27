@@ -24,7 +24,7 @@
    (브랜치 이름을 적지 않는다 — `init.defaultBranch`에 따라 master/main으로 갈린다).
    안 둔다면 plan.md '미정'에 그 결정과 날짜를 남긴다 — 나중에 보안 점검이 안 되는 이유가 거기
    있어야 한다.
-4. **`.gitignore`** — 스타터 파일이 동봉돼 있다(`settings.local.json`·`.env`·`.commit_msg.txt`).
+4. **`.gitignore`** — 스타터 파일이 동봉돼 있다(`settings.local.json`·`.env`·`.commit_msg.txt`·`scripts/_tmp/`).
    이 스택의 빌드 산출물·원본 데이터를 추가한다.
 5. **★ 스택 기본값 채우기 — 이 단계를 건너뛰지 말 것.** 템플릿에서 물려받은 기본값은 이 프로젝트
    것이 아니다 — **틀린 기본값은 빈 칸보다 나쁘다.**
