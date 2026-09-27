@@ -21,9 +21,10 @@
    <프로젝트 이름> — <한 줄 설명>. 스택은 <스택>으로 갈 생각이다.
    ```
 
-   `CLAUDE.md`는 자동으로 읽히고, 상단의 초기화 블록이 남아 있으면 **초기화 체크리스트를 먼저
-   진행**하게 되어 있다. **이 README를 읽으라고 시킬 필요는 없다** — 사람이 읽는 문서이고,
-   초기화 마지막 단계에서 지운다.
+   CLAUDE.md 상단의 초기화 블록이 남아 있으면 **세션 시작 훅(`session_context.py`)이 "초기화가
+   먼저"라고 알려** 초기화 체크리스트부터 진행하게 되어 있다. 블록은 HTML 주석이라 자동 로드되는
+   CLAUDE.md에서는 걷혀 AI에게 안 보인다 — 이 안내를 거는 것은 훅이다. **이 README를 읽으라고
+   시킬 필요는 없다** — 사람이 읽는 문서이고, 초기화 마지막 단계에서 지운다.
 3. 못 채우는 칸은 지우지 말고 "미정"으로 남긴다 — 나중에 그 결정을 해야 한다는 표시가 된다.
 4. **세션은 Phase 하나에 하나가 기본이다.** 세션 시작 훅(`session_context.py`)이 plan.md의 현재 Phase와
    진행 중 Phase 로그를 주입해 읽고 시작하게 돼 있어, Phase 경계가 곧 세션 경계면 이어받기 손실이 가장 적다.
@@ -87,14 +88,15 @@ scripts/measure_approvals.py     ← 승인 대기 원인 분류(예측) · meas
   와일드카드는 인자가 매번 달라지는 자리에만 좁게 열고, 나머지는 **호출 문자열을 고정**한다.
 - **`Bash(...)`와 `PowerShell(...)` 규칙은 별개다.** 이 환경의 기본 셸 도구가 무엇인지 먼저 확인.
 - **규칙을 추측하지 말 것** — 사용자가 확인 창에서 "다시 묻지 않기"를 한 번 고르면 매칭 코드가
-  `settings.local.json`에 정답 패턴을 적는다. 그걸 `settings.json`으로 옮기는 게 확실하다.
+  `settings.local.json`에 정답 패턴을 적는다. 그 자리에 그대로 둔다 — `settings.json`으로 옮기면 죽는다.
   규칙 검증은 자동 허용 부류(`git status`·`git log` 등)가 아니라 **실제로 묻던 명령**으로 한다.
 - **`cd X && ...` 복합 명령이나 `FOO=bar cmd` 접두사는 규칙에 안 걸린다.**
   환경변수는 `settings.json`의 `env`에 두고, `cd`는 애초에 쓰지 않는다(작업 디렉토리는 유지된다).
 - 상세: `docs/playbooks/노하우_승인_대기_최소화.md`
 - `.claude/settings.json` = git 커밋(공통) · `.claude/settings.local.json` = gitignore(개인).
 - `defaultMode: "acceptEdits"` 포함 — 혼자 작업 기준. **팀이면 이 줄을 개인 설정으로 옮길 것.**
-- 며칠 써본 뒤 `/fewer-permission-prompts`로 실사용 기반 갱신.
+- 며칠 써본 뒤 `/fewer-permission-prompts`로 실사용 기반 갱신 — 이 명령은 결과를 `settings.json`에
+  쓰므로 **추가된 줄을 `settings.local.json`으로 옮기고 `settings.json`의 `allow`는 다시 비운다.**
 
 ## 지식 3분할 원칙 (어디에 뭘 기록하나)
 
