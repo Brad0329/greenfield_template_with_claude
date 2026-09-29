@@ -94,7 +94,12 @@ scripts/measure_approvals.py     ← 승인 창 실측 기록 집계 + 원인 �
   환경변수는 `settings.json`의 `env`에 두고, `cd`는 애초에 쓰지 않는다(작업 디렉토리는 유지된다).
 - 상세: `docs/playbooks/노하우_승인_대기_최소화.md`
 - `.claude/settings.json` = git 커밋(공통) · `.claude/settings.local.json` = gitignore(개인).
-- `defaultMode: "acceptEdits"` 포함 — 혼자 작업 기준. **팀이면 이 줄을 개인 설정으로 옮길 것.**
+- **권한 모드(`defaultMode`)는 설정에 두지 않는다 — 기본 시작 모드 auto를 쓴다**(2026-09-29 사용자 결정).
+  Claude Code 2.1.283부터 기본 시작 모드가 auto(분류기가 위험한 것만 묻는다)이고, 데스크톱 앱에서도 이 줄이 없는
+  프로젝트 2곳이 "자동"으로 시작했다(실측). 종전 `acceptEdits`는 이 기본값을 덮어 막고 있었다.
+  - 데스크톱 앱 모드 선택기에서 고른 모드는 **폴더별로 기억되고 `defaultMode`보다 우선**한다.
+  - 모드 선택기에 **Auto가 없으면**(계정·모델·관리 정책) Manual로 떨어져 파일 수정마다 묻는다 — 그때
+    `settings.json`의 `permissions`에 `"defaultMode": "acceptEdits"`를 되살린다. 프로젝트 파일에 `"auto"`를 쓰면 무시된다.
 - 며칠 써본 뒤 `/fewer-permission-prompts`로 실사용 기반 갱신 — 이 명령은 결과를 `settings.json`에
   쓰므로 **추가된 줄을 `settings.local.json`으로 옮기고 `settings.json`의 `allow`는 다시 비운다.**
 
