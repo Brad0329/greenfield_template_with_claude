@@ -102,6 +102,11 @@ scripts/measure_approvals.py     ← 승인 창 실측 기록 집계 + 원인 �
     `settings.json`의 `permissions`에 `"defaultMode": "acceptEdits"`를 되살린다. 프로젝트 파일에 `"auto"`를 쓰면 무시된다.
 - 며칠 써본 뒤 `/fewer-permission-prompts`로 실사용 기반 갱신 — 이 명령은 결과를 `settings.json`에
   쓰므로 **추가된 줄을 `settings.local.json`으로 옮기고 `settings.json`의 `allow`는 다시 비운다.**
+- **클라우드 세션(claude.ai/code)에서도 수정 없이 돈다**(2026-09-30 실측, Ubuntu·Default 환경): 세션 시작 훅 주입,
+  차단 훅(`2>&1` 거부), `python`·`python3` 둘 다 있어 훅 명령 그대로. 준비는 GitHub에 Claude 권한 허가(github.com/apps/claude)와
+  환경 선택뿐 — **다른 프로젝트용 환경을 물려 쓰지 말 것**(그 시작 스크립트·키가 따라 들어온다).
+  클라우드는 GitHub에서 복제하므로 **로컬 커밋은 push한 뒤** 열고, 작업은 `claude/…` 브랜치에 쌓이니 PR로 합친다.
+  `settings.local.json`은 올라가지 않는다(gitignore) — 클라우드엔 허용 규칙이 없다.
 
 ## 지식 3분할 원칙 (어디에 뭘 기록하나)
 
