@@ -198,6 +198,21 @@ def test_기록_파일이_없으면_0건이_아니라_없음이다(tmp_path):
     assert load_permission_log({"s1"}, tmp_path / "none.jsonl") is None
 
 
+def test_사용자_질문_창은_승인_창과_따로_센다(capsys):
+    """bidwatch 2026-09-30: AskUserQuestion도 PermissionRequest로 기록된다(target 빈 값). 승인 창에 섞이면
+    '어떤 명령이 물었나'의 순위가 오염된다 — 건수에서 빼고 따로 알린다(조용히 버리지 않는다)."""
+    recs = [
+        {"session_id": "s", "tool_name": "Bash", "target": "git fetch"},
+        {"session_id": "s", "tool_name": "AskUserQuestion", "target": ""},
+        {"session_id": "s", "tool_name": "AskUserQuestion", "target": ""},
+    ]
+    print_permission_log(recs)
+    out = capsys.readouterr().out
+    assert "  1건 (그중 서브에이전트 0건)" in out
+    assert "회  AskUserQuestion" not in out                       # 순위 목록에 없다
+    assert "사용자 질문 창 2건" in out
+
+
 def test_실측_보고는_잘랐으면_전체_건수를_알린다(capsys):
     recs = [{"session_id": "s", "tool_name": f"Tool{i}", "target": "x"} for i in range(5)]
     print_permission_log(recs, top=2)

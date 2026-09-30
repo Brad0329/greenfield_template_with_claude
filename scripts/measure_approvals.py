@@ -245,6 +245,12 @@ def print_permission_log(records: list[dict] | None, top: int = 15) -> None:
         print("  기록 파일이 없다 — 훅(log_permission_request)이 등록 안 됐거나 한 번도 안 돌았다.")
         print("  아래 [규모]·[원인 분류]는 예측이다.")
         return
+    # AskUserQuestion(AI가 사용자에게 묻는 질문 창)도 PermissionRequest로 기록된다(bidwatch 2026-09-30) —
+    # 승인 창이 아니라 순위를 오염시키므로 건수에서 빼되, 조용히 버리지 않고 따로 알린다.
+    questions = [r for r in records if r.get("tool_name") == "AskUserQuestion"]
+    records = [r for r in records if r.get("tool_name") != "AskUserQuestion"]
+    if questions:
+        print(f"  (사용자 질문 창 {len(questions)}건은 승인 창이 아니라 따로 셌다 — AskUserQuestion)")
     if not records:
         print("  이 세션들에 기록 0건 — 안 물었거나, 훅 등록 전 세션이거나, 훅이 죽었다(가를 수 없다).")
         return

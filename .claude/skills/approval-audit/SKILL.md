@@ -58,6 +58,7 @@ python scripts/measure_approvals.py
 | **읽기전용** (grep·sed·wc…) | 인자가 매번 달라지는 자리면 **`settings.local.json`에** `명령 *`로 연다(슬래시 경로, Bash·PowerShell 양쪽). 아니면 호출 문자열을 고정한다. **`settings.json`의 allow는 효력이 없다** — 거기 넣지 않는다 | ○ (local에만) |
 | **상태변경 — 비파괴** (git add/commit·build·install·pub get…) | **반복되면 연다** (2026-08-22 사용자 결정, CLAUDE.md '허용의 기준은 위험'). 단 먼저 **이미 열린 형태가 있는지** 본다 — 있으면 규칙이 아니라 습관 문제다 | ○ (local에만) |
 | **상태변경 — 파괴** (삭제·reset --hard·force push·패키지 **추가**(새 의존성 — 잠금 파일대로 설치는 비파괴)·받은 실행물 실행) | **열지 않는다.** deny 유지. 호출 자체를 피한다 | ✗ |
+| **보호 경로 편집** (`.claude/`·`.git/` 안의 Edit/Write — `[실측]`에 Edit로 뜬다) | **규칙으로 안 열린다**(bidwatch 12건·bid-collectors 3형태 실측, 노하우 [H17] 정정). 편집을 몰아서 한다 | ✗ |
 | **판단필요** | 사람이 본다 | 사용자 확인 후 |
 
 > **★ 이 표가 있는 이유**: 규칙만 늘려서는 안 줄어든다. kanadic 2026-08-19 실측에서 최대

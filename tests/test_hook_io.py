@@ -28,6 +28,8 @@ ROOT = Path(__file__).resolve().parents[1]
 HOOKS = ROOT / ".claude" / "hooks"
 
 # (훅 파일, 막혀야 하는 명령, 통과해야 하는 명령)
+# ★ 프로젝트에서 차단 훅을 더 만들면 여기에 한 줄 넣는다 — 빠지면 그 훅의 인코딩 회귀는 아무도 안 잰다
+#   (bidwatch 2026-09-30: no_abs_project_path가 빠져 있었다).
 CASES = [
     ("no_redundant_cd.py", f"cd {ROOT.as_posix()} && git log --oneline -1", "cd app"),
     ("no_output_filter.py", "flutter test 2>&1 | Select-Object -Last 12", "flutter test"),
