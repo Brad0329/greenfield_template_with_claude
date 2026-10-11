@@ -32,7 +32,7 @@ r"""`flutter test`에 인자를 붙이면 막는다 — 맨몸 전체 실행이 
 
 **★ 전제 (템플릿 주): 전체 실행이 수십 초일 때 성립하는 정책이다** (출처 실측: 450건 23~27초).
 테스트가 늘어 전체 실행이 확인 대기보다 비싸지는 규모가 되면 이 훅을 다시 판단한다.
-Flutter를 안 쓰는 프로젝트면 이 훅과 settings.json의 등록을 지운다.
+Flutter를 안 쓰는 프로젝트면 세 곳에서 지운다 — 이 훅, settings.json의 등록, `tests/test_no_targeted_flutter_test.py`.
 """
 
 import re
