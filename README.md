@@ -47,7 +47,7 @@ docs/playbooks/노하우_*.md       ← 스택 중립 노하우 6종 — 항상 
 docs/playbooks/팩_*.md           ← 선택형 스택 팩 5종 — 해당 없으면 초기화 때 삭제
 work_log/plan.md                 ← 전체 계획 단일 원본
 work_log/_TEMPLATE_Phase_XXX.md  ← Phase 완료 로그
-.claude/agents/*.md              ← 선택적 에이전트 4종 (검증 3 + 조사 1)
+.claude/agents/*.md              ← 선택적 에이전트 5종 (검증 3 + 조사 1 + 문서 대조 1)
 .claude/skills/approval-audit/   ← /approval-audit — Phase 종료 시 승인 대기 원인 점검 (파이썬 3.10+)
 .claude/skills/debt-audit/       ← /debt-audit — Phase 3~5개마다 부채 점검(반복 실수·중복 로직·복수 원본). 목록만, 결정은 사용자
 .claude/hooks/*.py               ← 습관 차단 훅 6종: cd 복합·루트 git -C·출력 필터·flutter test 인자·인라인 파이썬·스크래치패드 절대경로·셸 파일 쓰기 + 세션 시작 주입 1종(session_context — plan.md 현재 Phase·원격에 안 올라간 커밋 수) + 승인 창 기록 1종(log_permission_request) (settings.json에 등록)
@@ -127,7 +127,7 @@ scripts/measure_approvals.py     ← 승인 창 실측 기록 집계 + 원인 �
 - **요구사항이 바뀌면 그 자리에서 REQUIREMENTS.md를 고친다** — 대화 속 합의로만 남기면
   다음 세션이 구버전으로 구현한다.
 
-## 에이전트 4종 — 있으면 쓰고, 없으면 대체한다
+## 에이전트 5종 — 있으면 쓰고, 없으면 대체한다
 
 | 에이전트 | 시점 | 역할 |
 |---|---|---|
@@ -135,9 +135,11 @@ scripts/measure_approvals.py     ← 승인 창 실측 기록 집계 + 원인 �
 | `requirements-analyst` | 구현 **전** | 요구사항을 구현 가능한 스펙으로 + **모호점을 질문 목록으로** |
 | `spec-checker` | 완료 **후** | 구현 vs 수용 기준 대조, 누락·조용한 축소·임의 추가 검출 |
 | `qa-tester` | Phase 완료 | 통합 테스트 게이트(foreground). 코드를 고치지 않고 판정만 |
+| `doc-sync-checker` | 규칙·결론을 바꾼 커밋 직전 | 바뀐 결론과 어긋나는 문장이 다른 문서에 남았는지 **읽어서** 찾아 목록만 반환(grep은 같은 단어만 잡는다) |
 
 **환경에 따라 서브에이전트 호출이 안 될 수 있다.** 그때는 CLAUDE.md '검증 게이트' 절대로
-메인 agent가 같은 원칙으로 직접 하되, **검증 자체를 건너뛰지 않고 그 사실을 커밋 메시지에 남긴다.**
+(`doc-sync-checker`는 'CLAUDE.md 비대화 방지' 절 끝) 메인 agent가 같은 원칙으로 직접 하되,
+**검증 자체를 건너뛰지 않고 그 사실을 커밋 메시지에 남긴다.**
 
 ## Phase 사이클
 
