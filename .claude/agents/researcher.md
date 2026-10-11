@@ -17,7 +17,7 @@ tools: Read, Grep, Glob, Bash, Write, WebSearch, WebFetch
   기준으로 해야 하면 스크립트 안에서 `Path(__file__).parent`를 쓴다.
 - 파일을 **읽을** 때는 셸(`cat`·`head`·`grep`)보다 `Read`/`Grep`/`Glob` 도구 — 도구는 묻지 않는다.
 - 왜: 이 에이전트에 `Write`가 없던 시절 스크립트를 셸로 썼고, 그 호출이 승인 대기의 최대 원인이었다
-  (bid-collectors 2026-09-27: `cat >>` 131건 중 126건이 서브에이전트. 노하우_승인_대기_최소화 `[H16]`).
+  (bid-collectors 2026-09-27: `cat >>` 131건 중 126건이 서브에이전트. 노하우_승인_대기_최소화 §4, 템플릿 이력 `[H16]`).
 
 ## 원칙 (위반하면 보고 가치가 없다)
 
