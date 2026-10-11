@@ -8,6 +8,9 @@ r"""세션이 시작될 때 plan.md의 현재 Phase와 이어 읽을 파일을 �
   - plan.md 'Phase 체크리스트'의 최상위 Phase 줄 전부(완료/전체 건수와 함께 — 자르지 않는다)
   - 첫 미완료 Phase = 현재 Phase, 그 번호의 `work_log/Phase_NNN.md`가 있으면 그 경로
   - '사용자 실테스트 대기' 절의 항목(플레이스홀더 `<...>` 제외)
+  - 원격이 있는데 어느 원격에도 안 올라간 커밋이 있으면 그 개수(PC 고장·분실 시 사라지는 몫).
+    **원격이 없으면 아무 말도 하지 않는다** — 원격을 안 두는 것은 초기화 때 사용자가 고른 것이라
+    매 세션 되물으면 잔소리가 된다. fetch는 하지 않는다(네트워크 없이 로컬 추적 정보만 본다).
   plan.md 전문을 싣지는 않는다 — 길어지면 매 세션 컨텍스트를 먹는다. 읽으라고 지시만 한다.
 
 **주입하지 않는 경우에도 한 줄은 낸다** — 이 훅의 출력이 세션 첫머리에 안 보이면 훅이 죽은 것이다
@@ -21,6 +24,7 @@ r"""세션이 시작될 때 plan.md의 현재 Phase와 이어 읽을 파일을 �
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -50,15 +54,44 @@ def _section(lines: list[str], title_part: str) -> list[str]:
     return body
 
 
+def _git(root: Path, *args: str) -> str | None:
+    """git 출력. 실패하면 이유를 stderr에 남기고 None — 알림 하나 때문에 주입 전체를 버리지 않는다."""
+    try:
+        p = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
+                           encoding="utf-8", errors="replace", timeout=5)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"session_context: git {args[0]} 실행 실패 ({e})", file=sys.stderr)
+        return None
+    if p.returncode != 0:
+        print(f"session_context: git {args[0]} 실패 (exit {p.returncode}) {p.stderr.strip()}", file=sys.stderr)
+        return None
+    return p.stdout.strip()
+
+
+def _unpushed_notice(root: Path) -> str | None:
+    """원격이 있는데 어느 원격에도 없는 커밋이 있으면 알림 한 줄. 그 외에는 None."""
+    if not (root / ".git").exists():
+        return None
+    if not _git(root, "remote"):
+        return None  # 원격 없음은 사용자 결정이다 — 되묻지 않는다
+    count = _git(root, "rev-list", "--count", "HEAD", "--not", "--remotes")
+    if not count or count == "0":
+        return None
+    return f"★ 원격에 안 올라간 커밋 {count}개 — 이 PC에만 있다(고장·분실 시 사라진다). 사용자에게 알릴 것."
+
+
 def build_context(root: Path) -> str:
     """주입할 문장을 만든다. 테스트가 이 함수를 직접 부른다."""
     claude_md = root / "CLAUDE.md"
     if claude_md.exists() and INIT_MARKER in claude_md.read_text(encoding="utf-8"):
         return "[session_context] 미초기화 템플릿이다 — CLAUDE.md 초기화 체크리스트가 먼저다. plan.md 주입은 생략한다."
 
+    unpushed = _unpushed_notice(root)
+    tail = [unpushed] if unpushed else []
+
     plan = root / "work_log" / "plan.md"
     if not plan.exists():
-        return "[session_context] work_log/plan.md가 없다 — 현재 Phase를 알 수 없다. 사용자에게 확인할 것."
+        return "\n".join(["[session_context] work_log/plan.md가 없다 — 현재 Phase를 알 수 없다. 사용자에게 확인할 것.", *tail])
 
     lines = plan.read_text(encoding="utf-8").splitlines()
 
@@ -87,6 +120,7 @@ def build_context(root: Path) -> str:
         out.append(f"사용자 실테스트 대기 {len(waiting)}건 — 확인 전 완료 선언 금지:")
         out += [f"  {l.strip()}" for l in waiting]
 
+    out += tail
     return "\n".join(out)
 
 

@@ -17,13 +17,25 @@
    쉽다. `.claude/`가 없으면 사용자에게 알린다. `git remote -v`가 템플릿 저장소를 가리키면 `.git/`을
    지우고 3번의 `git init`부터 다시 한다(원격·사이드바·커밋 이력이 템플릿에 묶이는 실사례).
 2. **프로젝트 정체성** — 이름 / 한 줄 설명 / 기술 스택을 물어 이 파일의 `<...>`를 채운다.
-3. **버전 관리** — `git init` 여부를 묻고, **원격을 둘지 묻는다**(배포·백업·협업·`/security-review`에
-   필요하다). 둔다면 GitHub 공개/비공개를 묻고 `gh repo create --private --source=. --push`류로
-   만들어 push까지 한다 — **`gh`가 없는 환경이 흔하다**(실측): 그때는 사용자가 GitHub 웹에서 빈
-   저장소를 만들고 URL을 주면 `git remote add origin <url>` + `git push -u origin HEAD`로 잇는다
-   (브랜치 이름을 적지 않는다 — `init.defaultBranch`에 따라 master/main으로 갈린다).
-   안 둔다면 plan.md '미정'에 그 결정과 날짜를 남긴다 — 나중에 보안 점검이 안 되는 이유가 거기
-   있어야 한다.
+3. **버전 관리** — `git init` 여부를 묻고, **원격을 둘지 묻는다 — 선택이다**(PC 고장·분실 시 복구
+   수단이고 배포·협업·클라우드 세션·`/security-review`에 필요하다. 권고는 비공개 원격이되 강요하지 않는다).
+   상세·근거: `노하우_프로세스.md` '원격·PC 분실 대비'.
+   - **둔다면** GitHub 공개/비공개를 묻고 `gh repo create --private --source=. --push`류로
+     만들어 push까지 한다 — **`gh`가 없는 환경이 흔하다**(실측): 그때는 사용자가 GitHub 웹에서 빈
+     저장소를 만들고 URL을 주면 `git remote add origin <url>` + `git push -u origin HEAD`로 잇는다
+     (브랜치 이름을 적지 않는다 — `init.defaultBranch`에 따라 master/main으로 갈린다).
+     - **잇기 전에 GitHub 계정이 여럿인지 읽어서 확인한다 — 사용자에게 묻지 않는다.** `~/.ssh/config`에
+       `HostName github.com`인 Host가 있으면 그 별칭 중 고르게 하고 `git@<별칭>:<계정>/<저장소>.git`으로
+       잇는다. 별칭은 없는데 `git credential-manager github list`가 둘 이상이면 SSH 별칭을 권고한다
+       (만드는 것은 사용자다 — **AI는 키·ssh config를 읽기만 한다**). 흔적이 없으면 SSH 얘기를 꺼내지 않고
+       받은 주소 그대로 잇는다. 계정을 골랐으면 `gh`가 로그인한 계정(`gh auth status`)과 같은지 보고
+       다르면 `gh`로 만들지 않는다(엉뚱한 계정에 생긴다). `git config user.name`·`user.email`이 고른
+       계정과 다르면 이 저장소에만 맞춘다 — push 계정과 커밋 작성자는 별개다.
+     - **git에 안 들어가는 것(`.env`·사용자 데이터·로컬 DB)을 어디에 보관할지** 묻고 plan.md '확정'에 적는다.
+   - **안 둔다면** plan.md '미정'에 그 결정과 날짜를 남기고 끝낸다(나중에 보안 점검이 안 되는 이유가
+     거기 있어야 한다) — 보관 위치를 묻지 않고, 세션 시작 훅도 원격이 없으면 아무 말 하지 않는다.
+   - **어느 쪽이든** 프로젝트 경로에 OneDrive·Google Drive·Dropbox·iCloud가 들어 있으면 알린다(막지 않는다)
+     — 동기화 프로그램이 `.git` 내부를 건드려 저장소가 깨진다.
 4. **`.gitignore`** — 스타터 파일이 동봉돼 있다(`settings.local.json`·`.env`·`.commit_msg.txt`·`scripts/_tmp/`).
    이 스택의 빌드 산출물·원본 데이터를 추가한다.
 5. **★ 스택 기본값 채우기 — 이 단계를 건너뛰지 말 것.** 템플릿에서 물려받은 기본값은 이 프로젝트
@@ -66,7 +78,7 @@
 - 현재: **Phase <N> — <이름>** (Phase 완료 시 이 줄과 plan.md 체크박스를 함께 갱신)
 
 ## 새 세션 시작 시
-- 훅(`session_context.py`)이 plan.md의 현재 Phase·읽을 Phase 로그·실테스트 대기를 주입한다 — 지시대로 읽는다.
+- 훅(`session_context.py`)이 plan.md의 현재 Phase·읽을 Phase 로그·실테스트 대기·원격에 안 올라간 커밋 수를 주입한다 — 지시대로 읽는다.
   **세션 첫머리에 `[session_context]` 줄이 안 보이면 훅이 죽은 것이다** — `work_log/plan.md`부터 직접 읽고 훅을 고친다.
 
 ## 불변 규칙

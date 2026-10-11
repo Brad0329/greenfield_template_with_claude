@@ -100,6 +100,54 @@ def test_전부_완료면_현재_Phase를_지어내지_않는다(tmp_path):
     assert "미완료 Phase가 없다" in build_context(_project(tmp_path, plan=plan))
 
 
+# ── 원격에 안 올라간 커밋 알림 — 실제 git 저장소로 돌려 본다 ─────────────────────
+
+def _git(root: Path, *args: str) -> None:
+    # 전역 설정(서명·작성자 미설정)에 따라 커밋이 실패하지 않게 이 호출에만 값을 준다.
+    subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", "-c", "commit.gpgsign=false", *args],
+        cwd=root, check=True, capture_output=True,
+    )
+
+
+def _repo(tmp_path: Path, remote: bool) -> Path:
+    root = _project(tmp_path)
+    _git(root, "init")
+    _git(root, "commit", "--allow-empty", "-m", "c1")
+    if remote:
+        _git(root, "init", "--bare", "_remote.git")
+        _git(root, "remote", "add", "origin", "_remote.git")
+        _git(root, "push", "origin", "HEAD")
+    return root
+
+
+def test_원격에_안_올라간_커밋은_개수와_함께_알린다(tmp_path):
+    root = _repo(tmp_path, remote=True)
+    _git(root, "commit", "--allow-empty", "-m", "c2")
+    _git(root, "commit", "--allow-empty", "-m", "c3")
+    assert "원격에 안 올라간 커밋 2개" in build_context(root)
+
+
+def test_전부_올라갔으면_알리지_않는다(tmp_path):
+    assert "안 올라간" not in build_context(_repo(tmp_path, remote=True))
+
+
+def test_원격이_없으면_커밋이_있어도_아무_말_하지_않는다(tmp_path):
+    # 원격을 안 두는 것은 사용자 선택이다 — 매 세션 경고하면 잔소리가 된다.
+    text = build_context(_repo(tmp_path, remote=False))
+    assert "원격" not in text
+    assert "현재 Phase: Phase 003" in text
+
+
+def test_plan이_없어도_안_올라간_커밋은_알린다(tmp_path):
+    root = _repo(tmp_path, remote=True)
+    (root / "work_log" / "plan.md").unlink()
+    _git(root, "commit", "--allow-empty", "-m", "c2")
+    text = build_context(root)
+    assert "plan.md가 없다" in text
+    assert "원격에 안 올라간 커밋 1개" in text
+
+
 # ── 훅을 실제로 돌려 본다 — cp949 콘솔 조건(test_hook_io.py와 같은 이유) ─────────
 
 def test_cp949_콘솔에서도_주입이_ASCII로_나간다():
