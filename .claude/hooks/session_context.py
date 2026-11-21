@@ -1,12 +1,14 @@
-r"""세션이 시작될 때 plan.md의 현재 Phase와 이어 읽을 파일을 컨텍스트에 주입한다 (SessionStart 훅).
+r"""세션이 시작될 때 plan.md의 현재 Phase·인계 건수·실테스트 대기를 컨텍스트에 주입한다 (SessionStart 훅).
 
-**왜 훅인가**: 종전 CLAUDE.md '새 세션 시작 시'는 "plan.md를 읽는다 / 진행 중 Phase 로그를 읽는다"
-두 규칙이었다. 기억에 의존하는 규칙이고, 어겨도 아무 증상이 없다(구버전 이해로 그냥 구현한다).
-주입은 기계적으로 할 수 있으므로 구조로 옮기고 CLAUDE.md에서는 한 줄로 줄였다.
+**왜 훅인가**: "세션을 시작하면 plan.md를 읽는다"는 기억에 의존하는 규칙이고, 어겨도 아무 증상이
+없다(구버전 이해로 그냥 구현한다). 주입은 기계적으로 할 수 있으므로 구조로 옮겼다.
 
 **무엇을 주입하나**:
   - plan.md 'Phase 체크리스트'의 최상위 Phase 줄 전부(완료/전체 건수와 함께 — 자르지 않는다)
-  - 첫 미완료 Phase = 현재 Phase, 그 번호의 `work_log/Phase_NNN.md`가 있으면 그 경로
+  - 첫 미완료 Phase = 현재 Phase
+  - '인계' 절의 건수(플레이스홀더 제외) — 내용은 싣지 않고 읽으라고만 한다. Phase별 로그 파일을 가리키던
+    것을 대신한다: 로그는 "그 번호의 Phase"에서만 가리켜져 다음 Phase 세션이 못 받았다(실프로젝트 실측,
+    6개 중 3개가 한 번도 안 읽혔다). plan.md는 매 세션 읽히므로 인계를 거기 둔다.
   - '사용자 실테스트 대기' 절의 항목(플레이스홀더 `<...>` 제외)
   - 원격이 있는데 어느 원격에도 안 올라간 커밋이 있으면 그 개수(PC 고장·분실 시 사라지는 몫).
     **원격이 없으면 아무 말도 하지 않는다** — 원격을 안 두는 것은 초기화 때 사용자가 고른 것이라
@@ -34,7 +36,6 @@ ROOT = Path(__file__).resolve().parents[2]
 
 INIT_MARKER = "템플릿 초기화 모드"
 PHASE_LINE = re.compile(r"^- \[( |x|X)\] (Phase [^\s:]+)(.*)$")
-PHASE_NUMBER = re.compile(r"Phase (\d{3})$")
 HEADING = re.compile(r"^## +(.*)$")
 
 
@@ -52,6 +53,12 @@ def _section(lines: list[str], title_part: str) -> list[str]:
         if inside:
             body.append(line)
     return body
+
+
+def _items(lines: list[str], title_part: str) -> list[str]:
+    """그 절의 글머리 항목. 안 채운 플레이스홀더(`- <...>`)는 뺀다."""
+    return [l for l in _section(lines, title_part)
+            if l.lstrip().startswith("-") and not l.lstrip().startswith("- <")]
 
 
 def _git(root: Path, *args: str) -> str | None:
@@ -107,15 +114,12 @@ def build_context(root: Path) -> str:
         out.append("현재 Phase: 미완료 Phase가 없다 — 다음 단계를 사용자에게 확인할 것.")
     else:
         out.append(f"현재 Phase: {current.group(2)}{current.group(3)}")
-        num = PHASE_NUMBER.search(current.group(2))
-        log = root / "work_log" / f"Phase_{num.group(1)}.md" if num else None
-        if log is not None and log.exists():
-            out.append(f"★ 이 Phase의 로그가 있다 — work_log/{log.name}도 읽을 것(이전 결정과 실패한 접근).")
-        else:
-            out.append("이 Phase의 로그 파일은 없다(실패한 접근·버린 대안이 아직 없다는 뜻).")
 
-    waiting = [l for l in _section(lines, "사용자 실테스트 대기")
-               if l.lstrip().startswith("-") and not l.lstrip().startswith("- <")]
+    handover = _items(lines, "인계")
+    if handover:
+        out.append(f"★ 인계 {len(handover)}건 — plan.md '인계' 절을 읽을 것(실패한 접근·버린 대안. 다시 밟지 않는다).")
+
+    waiting = _items(lines, "사용자 실테스트 대기")
     if waiting:
         out.append(f"사용자 실테스트 대기 {len(waiting)}건 — 확인 전 완료 선언 금지:")
         out += [f"  {l.strip()}" for l in waiting]

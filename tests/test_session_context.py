@@ -32,6 +32,14 @@ PLAN = """# 전체 계획
 - [ ] Phase 004: 검색
 - [ ] 운영 단계 전환
 
+## 인계 — 실패한 접근·버린 대안 (다음 세션이 다시 밟지 않도록)
+
+> 생겼을 때 바로 적는다.
+
+- Phase 002: SQLite 잠금 → 원인은 백신 → 예외 경로로 해결
+- <Phase 00N: 플레이스홀더>
+- Phase 002: A와 B 중 A — B는 오프라인에서 못 쓴다
+
 ## 사용자 실테스트 대기
 - 실기기에서 저장 후 재시작
 - <자동화 불가 항목: 플레이스홀더>
@@ -62,18 +70,16 @@ def test_Phase_줄은_자르지_않고_전부_싣는다(tmp_path):
         assert f"Phase {n}:" in text
 
 
-def test_현재_Phase의_로그가_있으면_읽으라고_한다(tmp_path):
-    root = _project(tmp_path)
-    (root / "work_log" / "Phase_003.md").write_text("# 로그\n", encoding="utf-8")
-    assert "work_log/Phase_003.md도 읽을 것" in build_context(root)
+def test_인계는_건수와_함께_읽으라고_한다(tmp_path):
+    text = build_context(_project(tmp_path))
+    assert "인계 2건" in text                # 플레이스홀더 1줄은 세지 않는다
+    assert "plan.md '인계' 절을 읽을 것" in text
 
 
-def test_다른_Phase의_로그는_현재_로그로_치지_않는다(tmp_path):
-    root = _project(tmp_path)
-    (root / "work_log" / "Phase_002.md").write_text("# 로그\n", encoding="utf-8")
-    text = build_context(root)
-    assert "도 읽을 것" not in text
-    assert "로그 파일은 없다" in text
+def test_인계가_비었으면_아무_말_하지_않는다(tmp_path):
+    plan = PLAN.replace("- Phase 002: SQLite 잠금 → 원인은 백신 → 예외 경로로 해결\n", "") \
+               .replace("- Phase 002: A와 B 중 A — B는 오프라인에서 못 쓴다\n", "")
+    assert "인계" not in build_context(_project(tmp_path, plan=plan))
 
 
 def test_실테스트_대기는_건수와_함께_플레이스홀더를_빼고_싣는다(tmp_path):
