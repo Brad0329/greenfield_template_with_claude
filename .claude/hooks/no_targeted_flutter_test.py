@@ -1,9 +1,11 @@
 r"""`flutter test`에 승인 창을 만드는 인자를 붙이면 막는다 (PreToolUse 훅).
 
 **열려 있는 형태는 셋이다**:
-  - `flutter test --reporter failures-only` — 전체 실행, 실패만 출력. **전체 실행의 기본형이다** —
-    맨몸 출력은 809건에 69만 바이트라 도구가 중간을 잘랐고 실패한 테스트 이름이 결과에 없었다(실측 2026-11-25).
-  - 맨몸 `flutter test` — 전체 실행, 모든 출력. 막지는 않는다.
+  - 맨몸 `flutter test` — 전체 실행, 모든 출력.
+  - `flutter test --reporter failures-only` — 전체 실행, 실패 위주 출력.
+    **둘 다 테스트가 늘면 실패한 테스트 이름이 결과에서 사라진다**(실측 2026-11-25, 809건: 맨몸은 69만 바이트라
+    도구가 중간을 잘랐고, failures-only는 통과한 테스트의 print를 그대로 내보내 마찬가지였다). 그 규모가 되면
+    json 리포터로 돌려 실패만 요약하는 래퍼 스크립트를 둔다 — `팩_Flutter_Android.md` '테스트'.
   - `flutter test <테스트 파일 하나>` — **실패를 일부러 보려는 실행**(재현 테스트의 첫 실패·변이 확인)에 쓴다.
     허용 규칙 `flutter test test/*`가 있어야 안 묻는다(`노하우_승인_대기_최소화.md` §5 스타터).
 
@@ -48,9 +50,8 @@ ALLOWED_EXACT = {"flutter test --reporter failures-only"}
 REASON = (
     "`flutter test`에 이 인자를 붙이지 말 것 — **호출마다 새 확인 창**이 뜬다.\n"
     "  열려 있는 형태는 셋뿐이다:\n"
-    "  - `flutter test --reporter failures-only` — 전체, 실패만 출력. **전체 실행의 기본형**\n"
-    "    (맨몸 출력은 길어서 중간이 잘리고 실패한 테스트 이름이 사라진다)\n"
-    "  - `flutter test` — 전체, 모든 출력\n"
+    "  - `flutter test` — 전체\n"
+    "  - `flutter test --reporter failures-only` — 전체, 실패 위주 출력\n"
     "  - `flutter test test/foo_test.dart` — 파일 하나, 경로만(실패를 일부러 보는 재현·변이 확인용)\n"
     "  `--plain-name`·`--name`·다른 리포터·파일 여러 개·파일 뒤 옵션은 막힌다.\n"
     "  정말 다른 인자가 필요하면 **사용자에게 말하고 승인을 받는다.**"
