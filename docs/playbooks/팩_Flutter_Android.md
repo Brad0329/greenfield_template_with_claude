@@ -25,6 +25,11 @@
 
 ## 테스트
 
+- **전체 실행은 `flutter test --reporter failures-only`, 실패를 일부러 보는 실행은 파일 하나(`flutter test test/foo_test.dart`).**
+  맨몸 전체 실행은 출력이 길어(809건에 69만 바이트) 도구가 중간을 자르고 실패한 테스트 이름이 사라진다.
+  실측(809건): 전체 48~62초, 파일 하나 7초. 래퍼 스크립트로 감쌌으면 래퍼도 이 두 형태를 받게 한다.
+- **복잡도 도구(dart_code_linter metrics 등)를 analyze 명령에 묶지 않는다** — 단독 18~20초라 매 변경의 정적 분석이
+  두 배가 된다(실측 16초→35초). 커밋 직전 1회만 따로 돌린다.
 - **`testWidgets` 안에서 진짜 파일 I/O를 `await`하면 타임아웃까지 매달린다.** FakeAsync가
   시계를 잡고 있어 영영 안 끝난다. 파일 준비는 동기 API(`createTempSync`·`writeAsStringSync`)로
   하거나 `tester.runAsync`로 감싼다. (같은 함정을 세 번 밟았다 — 증상이 "테스트가 그냥
