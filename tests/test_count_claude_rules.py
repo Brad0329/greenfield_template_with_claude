@@ -13,7 +13,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from count_claude_rules import DEFAULT_CAP, ROOT, expiry_lines, rule_lines  # noqa: E402
+from count_claude_rules import (  # noqa: E402
+    DEFAULT_CAP, ROOT, expiry_lines, longest_rules, rule_lines, size,
+)
 
 
 def test_글머리와_번호를_센다():
@@ -38,6 +40,22 @@ def test_만료_표시는_이어지는_줄에서도_찾고_초기화_블록은_�
     text = ("- 초기화 ⏳만료: 이건 빼야 한다\n<!-- 초기화 블록 끝 -->\n"
             "- 규칙\n  ⏳만료: 채워지면 지운다\n본문 ⏳만료: 글머리 아님\n- 모래시계(⏳) 설명 줄\n")
     assert expiry_lines(text) == ["⏳만료: 채워지면 지운다", "본문 ⏳만료: 글머리 아님"]
+
+
+def test_분량은_초기화_블록을_빼고_잰다():
+    text = "- 초기화 줄은 길어도 안 센다\n<!-- 초기화 블록 끝 -->\n- 가나\n본문\n"
+    assert size(text) == (2, 6)
+
+
+def test_가장_긴_규칙은_이어지는_줄까지_합쳐_잰다():
+    """글머리에 문장을 붙여 넣으면 개수는 그대로다 — 길이로만 드러난다."""
+    text = ("- 짧다\n"
+            "- 길다\n  이어지는 줄 하나\n  이어지는 줄 둘\n"
+            "\n  빈 줄 뒤 문단은 앞 규칙에 안 붙는다 — 아주아주아주아주아주아주 긴 문단\n"
+            "- 중간쯤 되는 규칙\n")
+    got = longest_rules(text, top=2)
+    assert [first for _, first in got] == ["- 길다", "- 중간쯤 되는 규칙"]
+    assert got[0][0] == len("- 길다") + len("이어지는 줄 하나") + len("이어지는 줄 둘")
 
 
 def test_실제_CLAUDE_md가_상한_이내다():

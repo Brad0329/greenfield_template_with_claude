@@ -16,6 +16,12 @@
 - 초기화 블록(`초기화 블록 끝` 표시 앞)은 제외 — 초기화가 끝나면 삭제되는 부분이다.
 - 한 줄에 규칙이 둘 있어도 하나로 센다. 정확한 값이 아니라 **재현 가능한 값**이 목적이다.
 
+## 분량은 참고값으로 함께 낸다 (2026-11-25)
+
+개수는 두 가지를 못 잰다 — 글머리 하나에 지시를 여러 개 붙여 넣는 것(개수 그대로)과 글머리 밖 문단.
+그래서 **줄 수·글자 수와 가장 긴 규칙 3개**를 함께 출력한다. 상한이 아니라 참고값이다: 위 요인 연구는 크기의
+효과를 못 찾았고 공식 문서는 200줄 미만을 권한다 — 근거가 갈려 exit 코드에는 넣지 않는다.
+
 개수와 함께 **만료 표시(`EXPIRY_MARKER`)가 붙은 줄을 출력한다** — 한 번 통과하면 끝나는 게이트는
 조건이 채워졌을 때 지워야 하는데, 지울 시점을 기억하는 사람이 없다. Phase 종료 점검에 묻어간다.
 
@@ -37,6 +43,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CAP = 100
+# 공식 문서(code.claude.com/docs/en/memory, 2026-11-25 확인): "target under 200 lines per CLAUDE.md file"
+DOC_LINE_TARGET = 200
 INIT_END_MARKER = "초기화 블록 끝"
 # 한 번 통과하면 끝나는 게이트에 붙는 표시 — 조건이 채워지면 그 문장을 지운다(CLAUDE.md '비대화 방지')
 EXPIRY_MARKER = "⏳만료:"
@@ -47,35 +55,68 @@ TABLE_SEPARATOR = re.compile(r"^\s*\|[\s:\-|]+\|?\s*$")
 PLACEHOLDER = re.compile(r"<[^<>\n]+>")
 
 
-def rule_lines(text: str) -> list[str]:
-    """규칙으로 세는 줄만 돌려준다. 테스트가 이 함수를 직접 부른다."""
+def _body(text: str) -> list[str]:
+    """초기화 블록 뒤의 줄들. 표시가 없으면 전체."""
     lines = text.splitlines()
     for i, line in enumerate(lines):
         if INIT_END_MARKER in line:
-            lines = lines[i + 1:]
-            break
-    out: list[str] = []
-    for i, line in enumerate(lines):
-        if PLACEHOLDER.search(line):
-            continue
-        if BULLET.match(line):
-            out.append(line)
-        elif TABLE_ROW.match(line) and not TABLE_SEPARATOR.match(line):
-            # 머리행 = 바로 다음 줄이 구분행인 표 행
-            nxt = lines[i + 1] if i + 1 < len(lines) else ""
-            if not TABLE_SEPARATOR.match(nxt):
-                out.append(line)
-    return out
+            return lines[i + 1:]
+    return lines
+
+
+def _is_rule(lines: list[str], i: int) -> bool:
+    line = lines[i]
+    if PLACEHOLDER.search(line):
+        return False
+    if BULLET.match(line):
+        return True
+    if TABLE_ROW.match(line) and not TABLE_SEPARATOR.match(line):
+        # 머리행 = 바로 다음 줄이 구분행인 표 행
+        nxt = lines[i + 1] if i + 1 < len(lines) else ""
+        return not TABLE_SEPARATOR.match(nxt)
+    return False
+
+
+def rule_lines(text: str) -> list[str]:
+    """규칙으로 세는 줄만 돌려준다. 테스트가 이 함수를 직접 부른다."""
+    lines = _body(text)
+    return [line for i, line in enumerate(lines) if _is_rule(lines, i)]
 
 
 def expiry_lines(text: str) -> list[str]:
     """만료 표시가 붙은 줄(초기화 블록 뒤). 글머리가 아닌 이어지는 줄에도 붙으므로 전 줄을 훑는다."""
-    lines = text.splitlines()
+    return [line.strip() for line in _body(text) if EXPIRY_MARKER in line]
+
+
+def size(text: str) -> tuple[int, int]:
+    """(줄 수, 글자 수) — 초기화 블록 뒤. 개수가 못 재는 것을 본다: 글머리 밖 문단과 글머리에 붙여 넣은 문장."""
+    lines = _body(text)
+    return len(lines), sum(len(line) for line in lines)
+
+
+def longest_rules(text: str, top: int = 3) -> list[tuple[int, str]]:
+    """(글자 수, 첫 줄) 긴 순서로 top개. 규칙 하나 = 그 줄 + 들여 쓴 이어지는 줄.
+
+    글머리 하나에 지시를 여러 개 붙이면 개수는 그대로다 — 그것이 여기서 드러난다.
+    """
+    lines = _body(text)
+    items: list[tuple[int, str]] = []
+    current: list[str] | None = None
     for i, line in enumerate(lines):
-        if INIT_END_MARKER in line:
-            lines = lines[i + 1:]
-            break
-    return [line.strip() for line in lines if EXPIRY_MARKER in line]
+        if _is_rule(lines, i):
+            if current:
+                items.append((sum(len(part.strip()) for part in current), current[0].strip()))
+            current = [line]
+        elif current is not None and line.strip() and line[:1].isspace() and not BULLET.match(line):
+            current.append(line)
+        else:
+            # 빈 줄·제목·들여 쓰지 않은 본문·플레이스홀더 글머리 — 앞 규칙이 여기서 끝난다
+            if current:
+                items.append((sum(len(part.strip()) for part in current), current[0].strip()))
+            current = None
+    if current:
+        items.append((sum(len(part.strip()) for part in current), current[0].strip()))
+    return sorted(items, key=lambda it: -it[0])[:top]
 
 
 def main() -> int:
@@ -98,6 +139,12 @@ def main() -> int:
 
     verdict = "초과 — 이관할 것" if n > args.cap else "이내"
     print(f"[{path.name}] 규칙 {n}개 / 상한 {args.cap}개 → {verdict}")
+    n_lines, n_chars = size(text)
+    over = "넘음" if n_lines >= DOC_LINE_TARGET else "이내"
+    print(f"  분량(참고값, 상한 아님): {n_lines}줄 · {n_chars:,}자 — 공식 문서 권고 {DOC_LINE_TARGET}줄 미만 → {over}")
+    print("  가장 긴 규칙(글머리에 붙여 넣으면 개수는 그대로다):")
+    for chars, first in longest_rules(text):
+        print(f"    {chars:5d}자  {first[:50]}")
     expiring = expiry_lines(text)
     if expiring:
         print(f"  만료 표시 {len(expiring)}개 — 조건이 채워졌으면 그 문장을 지운다:")
