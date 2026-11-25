@@ -20,7 +20,8 @@ sys.path.insert(0, str(ROOT / ".claude" / "hooks"))
 from no_redundant_cd import REASON_GIT_C, REASON_OTHER, REASON_ROOT, blocked  # noqa: E402
 
 REPO = ROOT.as_posix()
-REPO_MSYS = "/" + REPO[0].lower() + REPO[2:]
+# Git Bash(MSYS) 표기. 드라이브 문자가 없는 루트(리눅스)에는 없다 — 그대로 둔다.
+REPO_MSYS = "/" + REPO[0].lower() + REPO[2:] if REPO[1:2] == ":" else REPO
 
 
 @pytest.mark.parametrize("command", [

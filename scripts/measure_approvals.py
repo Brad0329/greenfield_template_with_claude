@@ -91,8 +91,10 @@ def _repo_path_pattern(root: Path) -> str:
         # `C:/…`뿐 아니라 Git Bash(MSYS)의 `/c/…`도 같은 루트다 (vanasso.kr 2026-09-06: 20건 통과)
         head = f"(?:[{d.upper()}{d.lower()}]:|/[{d.upper()}{d.lower()}])"
     else:
-        head = re.escape(first)
-    body = "[\\\\/]".join(re.escape(c) for c in comps[1:])
+        # POSIX 절대경로는 맨 앞 `/`를 살린다 — 쪼갤 때 사라져 `home/u/repo`가 되면 `cd /home/u/repo`에 안 맞는다
+        # (리눅스에서 훅이 루트 cd·`git -C`를 통과시켰다, 2026-11-25).
+        head = ("/" if str(root).startswith("/") else "") + re.escape(first)
+    body ="[\\\\/]".join(re.escape(c) for c in comps[1:])
     return rf"""["']?{head}[\\/]{body}[\\/]?["']?"""
 
 

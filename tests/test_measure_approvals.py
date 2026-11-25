@@ -19,16 +19,17 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 from measure_approvals import (  # noqa: E402
-    REDUNDANT_CD_COMMAND, REDUNDANT_CD_SEGMENT, ROOT, allowed, classify, find_sessions,
-    head_command, is_readonly, load_permission_log, print_permission_log, shell_calls,
-    split_segments,
+    REDUNDANT_CD_COMMAND, REDUNDANT_CD_SEGMENT, ROOT, _repo_cd_pattern, _repo_path_pattern,
+    allowed, classify, find_sessions, head_command, is_readonly, load_permission_log,
+    print_permission_log, shell_calls, split_segments,
 )
 
 REPO = str(ROOT).replace("\\", "/")   # 슬래시형 경로
@@ -63,7 +64,24 @@ def test_빈_조각은_버린다():
 
 # ── ② cd 패턴: 명령용과 조각용이 다르다 ─────────────────────────────────────
 
-REPO_MSYS = "/" + REPO[0].lower() + REPO[2:]   # Git Bash(MSYS) 경로: C:/Users/… → /c/Users/…
+# Git Bash(MSYS) 경로: C:/Users/… → /c/Users/…. 드라이브 문자가 없는 루트(리눅스)에는 MSYS 표기가 없다 —
+# 그대로 둔다(첫 글자를 드라이브 문자로 가정하면 `/home/…`이 `//ome/…`이 된다).
+REPO_MSYS = "/" + REPO[0].lower() + REPO[2:] if REPO[1:2] == ":" else REPO
+
+
+def test_POSIX_절대경로_루트도_잡는다():
+    """리눅스(클라우드 세션)에서 루트 `/home/u/repo`의 패턴이 맨 앞 `/` 없이 `home/u/repo`로 만들어져
+    `cd /home/u/repo`·`git -C /home/u/repo`를 하나도 못 잡았다(2026-11-25 외부 평가: 리눅스에서 19건 실패).
+    Windows에서도 도는 재현 — 경로를 PurePosixPath로 넘긴다."""
+    root = PurePosixPath("/home/u/repo")
+    cd = re.compile(_repo_cd_pattern(root) + r"\s*$")
+    assert cd.match("cd /home/u/repo")
+    assert cd.match('cd "/home/u/repo/"')
+    assert not cd.match("cd home/u/repo")           # 상대경로는 다른 디렉토리다
+    assert not cd.match("cd /home/u/repo-other")
+    git_c = re.compile(r"git\s+-C\s+" + _repo_path_pattern(root) + r"(?=\s|$)")
+    assert git_c.search("git -C /home/u/repo status")
+    assert not git_c.search("git -C /home/u/repo/sub status")
 
 
 @pytest.mark.parametrize("command", [
