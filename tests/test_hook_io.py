@@ -44,7 +44,7 @@ CASES = [
 # 자동으로 빠진다. 위 훅들은 스택 중립이라 항상 있어야 하고, 없으면 그대로 실패한다(조용히 빼지 않는다).
 # 2026-09-05 초기화 시뮬레이션에서 이 훅을 지우자 이 파일의 4건이 "파일 없음"으로 죽은 실사례.
 _OPTIONAL = [
-    ("no_targeted_flutter_test.py", "flutter test test/x_test.dart", "flutter test"),
+    ("no_targeted_flutter_test.py", "flutter test --plain-name x", "flutter test"),
 ]
 CASES += [c for c in _OPTIONAL if (HOOKS / c[0]).exists()]
 
